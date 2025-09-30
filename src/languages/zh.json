@@ -3,5 +3,11 @@
   "language": "语言",
   "parse": "解析",
   "placeholder": "请输入",
-  "history": "最近解析"
+  "history": "最近解析",
+  "downloadList": "下载列表",
+  "setting": "设置项",
+  "noDownloadItem": "暂无下载项",
+  "noSettingItem": "暂无可配置项",
+  "zh-cn": "中文",
+  "en": "英文"
 }

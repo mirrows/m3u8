@@ -3,5 +3,11 @@
   "language": "language",
   "parse": "parse",
   "placeholder": "please input",
-  "history": "history"
+  "history": "history",
+  "downloadList": "download list",
+  "setting": "setting",
+  "noDownloadItem": "no  download item now",
+  "noSettingItem": "no setting item",
+  "zh-cn": "Chinese",
+  "en": "English"
 }

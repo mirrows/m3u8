@@ -6,11 +6,11 @@ import en from 'element-plus/es/locale/lang/en'
 export const languagesMap: Record<string, { parseLang: Record<string, string>, i18n: any }> = {
   'zh-cn': {
     parseLang: parseZh,
-    i18n: zhCn
+    i18n: zhCn,
   },
   'en': {
     parseLang: parseEn,
-    i18n: en
+    i18n: en,
   }
 
 }

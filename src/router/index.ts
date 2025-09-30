@@ -8,6 +8,16 @@ const router = createRouter({
       name: 'main',
       component: () => import('@/pages/main/index.vue'),
     },
+    {
+      path: '/download',
+      name: 'download',
+      component: () => import('@/pages/download/index.vue'),
+    },
+    {
+      path: '/setting',
+      name: 'setting',
+      component: () => import('@/pages/setting/index.vue'),
+    },
   ],
 })
 
