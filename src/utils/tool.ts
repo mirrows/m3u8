@@ -18,7 +18,6 @@ type ConfirmDeleteParams = {
   msg?: string,
 }
 export const confirmD = ({ cb, msg = language.cur.confirmDelete }: ConfirmDeleteParams) => {
-  console.log(language.cur)
   return new Promise((resolve, reject) => {
     ElMessageBox.confirm(msg, language.cur.tips, {
       confirmButtonText: language.cur.confirm,
