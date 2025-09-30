@@ -9,5 +9,9 @@
   "noDownloadItem": "暂无下载项",
   "noSettingItem": "暂无可配置项",
   "zh-cn": "中文",
-  "en": "英文"
+  "en": "英文",
+  "tips": "提示",
+  "confirmDelete": "确定删除吗？",
+  "confirm": "确定",
+  "cancel": "取消"
 }

@@ -9,5 +9,9 @@
   "noDownloadItem": "no  download item now",
   "noSettingItem": "no setting item",
   "zh-cn": "Chinese",
-  "en": "English"
+  "en": "English",
+  "tips": "tips",
+  "confirmDelete": "Are you sure you want to delete this?",
+  "confirm": "confirm",
+  "cancel": "cancel"
 }

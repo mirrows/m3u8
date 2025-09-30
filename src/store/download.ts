@@ -11,6 +11,9 @@ export const useDownload = defineStore('download', {
     },
     remove(download: Source) {
       this.list = this.list.filter(item => item.id !== download.id)
+    },
+    update(download: Partial<Source>) {
+      this.list = this.list.map(item => item.id === download.id ? { ...item, ...download } : item)
     }
   }
 })

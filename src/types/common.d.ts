@@ -28,6 +28,7 @@ type Source = {
   sizeStr: string,
   timestamp: number,
   timeStr: string,
+  status: string,
   url: string,
   links: Link[],
 }
