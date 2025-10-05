@@ -13,5 +13,6 @@
   "tips": "tips",
   "confirmDelete": "Are you sure you want to delete this?",
   "confirm": "confirm",
-  "cancel": "cancel"
+  "cancel": "cancel",
+  "folder": "file position"
 }

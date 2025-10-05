@@ -7,10 +7,11 @@ import { CloseBold } from '@element-plus/icons-vue'
 import CustomIcon from '@/components/custom-icon/index.vue'
 import { ElMessageBox } from 'element-plus'
 import { confirmD } from '@/utils/tool'
+import type { Source } from '@/types/common'
 
 const download = useDownload();
 const language = useLanguageStore();
-const downloadList = computed(() => {
+const downloadList = computed<Source[]>(() => {
   return download.list || []
 })
 
@@ -47,7 +48,7 @@ const deleteVideo = (item: Source) => {
         </div>
         <el-progress
           v-if="item.status !== 'done'"
-          :percentage="Math.min(item.links.filter(link => link.status === 'success').length/item.links.length * 100, 100)"
+          :percentage="Math.min(item.links.filter(link => link.status === 'done').length/item.links.length * 100, 100)"
           :stroke-width="5"
           striped
           striped-flow

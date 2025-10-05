@@ -6,7 +6,9 @@ pub fn run() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
       api::parse_site,
-      api::download_video
+      api::download_video,
+      api::download_item,
+      api::combine_splits
     ])
     .setup(|app| {
       if cfg!(debug_assertions) {

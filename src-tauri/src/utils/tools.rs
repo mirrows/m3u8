@@ -77,7 +77,9 @@ pub fn handle_body(body: &str, reg: Regex) -> String {
   let mut res = String::new();
   // 提取 <title> 内容
   if let Some(capture) = reg.captures(body) {
-    res = capture[1].to_string();
+    if let Some(matched) = capture.get(1) {
+      res = matched.as_str().to_string();
+    }
   } else {
     println!("capture not thing");
   }
@@ -128,6 +130,10 @@ pub fn query_ts_list(body: &str, base_url: &str) -> Vec<String> {
   let mut vec = Vec::new();
   let re = Regex::new(r"(?m)^([^#]\S+)$").unwrap();
   for capture in re.captures_iter(body) {
+    vec.push(complete_url(&base_url, &capture[1].to_string()));
+  }
+  let init_re = Regex::new("#EXT-X-MAP:URI=[\'\"]([^\'\"]*?)[\'\"]\r?\n").unwrap();
+  if let Some(capture) = init_re.captures(body) {
     vec.push(complete_url(&base_url, &capture[1].to_string()));
   }
   vec

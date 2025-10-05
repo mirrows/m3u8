@@ -1,4 +1,4 @@
-type VideoMsg = {
+export type VideoMsg = {
   title: string;
   name: string;
   url: string;
@@ -13,13 +13,13 @@ type VideoMsg = {
   }[];
 }
 
-type Res<T> = {
+export type Res<T> = {
   code: number,
   msg: string,
   data: T,
 }
 
-type Source = {
+export type Source = {
   id: string,
   title: string,
   name: string,
@@ -34,9 +34,14 @@ type Source = {
 }
 
 
-type Link = {
+export type Link = {
   status: string,
   url: string,
   bytes: any[],
+}
+
+export type ResStatus = {
+  status: string,
+  errMsg: string,
 }
 

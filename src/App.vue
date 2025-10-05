@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import Menu from '@/components/menu/index.vue'
-import { computed, ref } from 'vue';
-import { useLanguageStore } from '@/store/language'
-import { useNav } from './store/nav';
+  import Menu from '@/components/menu/index.vue'
+  import { computed, onMounted, ref } from 'vue';
+  import { useLanguageStore } from '@/store/language'
+  import { useNav } from './store/nav';
 
   const nav = useNav()
   const language = useLanguageStore()
   const locale = computed(() => {
     return language.locale
   })
+
 </script>
 
 <template>

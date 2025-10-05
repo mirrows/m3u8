@@ -79,7 +79,10 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
     console.log(res);
     // ElMessage.success('解析成功，即将开始下载');
     curVideo.value = {} as VideoMsg
-    download.add(res.data)
+    download.add({
+      ...res.data,
+      status: 'ready',
+    })
     ElMessageBox.confirm('解析成功，即将开始下载，是否跳转下载列表?')
     .then((res) => {
       router.push({
