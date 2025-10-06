@@ -40,7 +40,7 @@ pub async fn fetch_and_process(
   loop {
       let result = async {
           // 发送 GET 请求并获取响应
-          let response = client.get(url).send().await;
+          let response = client.get(url).send().await; 
 
           match response {
               Ok(resp) => {

@@ -228,17 +228,23 @@ pub async fn combine_splits(name: String, file_type: String) -> Result<Res::<Res
   writer.flush().await.map_err(|e| e.to_string())?;
 
   // 拼接 concat 协议格式路径
-  let concat_input = format!("concat:{}|{}", init_path, output_file_path);
+  let concat_input = if file_type == "m4s" {
+      format!("concat:{}|{}", init_path, output_file_path)
+    } else {
+      format!("{}", output_file_path)
+    };
+  // let concat_input = format!("concat:{}|{}", init_path, output_file_path);
   let output_final_file_path = format!("{}/video__output/{}.{}", DOWNLOAD_DIR, name, FILE_TYPE);
   // 调用 ffmpeg
   let status = Command::new("ffmpeg")
       .args(&[
           "-i", &concat_input,
           "-c", "copy",
-          &output_final_file_path,
-      ])
-      .status()
-      .expect("failed to execute ffmpeg");
+          "-y",
+        &output_final_file_path,
+    ])
+    .status()
+    .expect("failed to execute ffmpeg");
 
   if status.success() {
       println!("合并成功，输出文件位于 {}", output_final_file_path);
