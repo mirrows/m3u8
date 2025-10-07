@@ -11,6 +11,7 @@ export type VideoMsg = {
     size: string;
     sizeStr?: string;
   }[];
+  lastLogin: number,
 }
 
 export type Res<T> = {
@@ -31,13 +32,14 @@ export type Source = {
   status: string,
   url: string,
   links: Link[],
+  lastLogin: number,
 }
 
 
 export type Link = {
   status: string,
   url: string,
-  bytes: any[],
+  // bytes: any[],
 }
 
 export type ResStatus = {

@@ -2,8 +2,9 @@
 import { defineStore } from 'pinia'
 import type { Res, ResStatus, Source } from '@/types/common'
 import { core } from '@tauri-apps/api'
-import { Finished } from '@element-plus/icons-vue'
 import { wait } from '@/utils/tool'
+import { db } from '@/db'
+import { ElMessageBox } from 'element-plus'
 
 const { invoke } = core
 
@@ -17,15 +18,25 @@ export const useDownload = defineStore('download', {
     list: [] as Source[],
   }),
   actions: {
-    add(download: Source) {
-      this.list.unshift(download)
+    async load() {
+      this.list = await db.downloadList.orderBy('lastLogin').reverse().toArray()
+    },
+    async add(download: Source) {
+      const res = { ...download, lastLogin: Date.now() }
+      await db.downloadList.put({ ...res, links: download.links.map(link => ({ ...link, url: '' })) })
+      this.list.unshift(res)
       this.startDownload()
     },
-    remove(download: Source) {
+    async remove(download: Source) {
       this.list = this.list.filter(item => item.id !== download.id)
+      await db.downloadList.delete(download.id)
     },
-    update(download: Partial<Source>) {
+    async update(download: Partial<Source>) {
+      const item = this.list.find(item => item.id === download.id)
+      if (!item) return
       this.list = this.list.map(item => item.id === download.id ? { ...item, ...download } : item)
+      const res = { ...item, ...download }
+      await db.downloadList.put({ ...res, links: res.links.map(link => ({ ...link, url: '' })) })
     },
     async startDownload() {
       if (this.list.filter(item => item.status === 'downloading').length >= process) return
@@ -33,6 +44,7 @@ export const useDownload = defineStore('download', {
       if (!startItem) return
       startItem.status = 'downloading'
       const waiter = new Waiter()
+      await db.downloadList.put({ ...startItem, links: startItem.links.map(link => ({ ...link, url: '' })) })
       for (let i = 0; i < startItem.links.length; i++) {
         if (startItem.links[i].status === 'done') continue
         // console.log(startItem.title, 'map:', downloadList[startItem.title])
@@ -49,19 +61,30 @@ export const useDownload = defineStore('download', {
       return invoke<Res<ResStatus>>('download_item', {
         url: video.links[index].url,
         path,
-      }).then(res => {
+      }).then(async (res) => {
         // console.log('download Finished', index)
         video.links[index].status = res.data.status
         const ind = downloadList[video.title].findIndex(ind => ind === index)
         downloadList[video.title].splice(ind, 1)
+        await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
         waiter.emit()
         if (!video.links.every(link => link.status === 'done')) return
         video.status = 'done'
         this.startDownload();
-        invoke<Res<ResStatus>>('combine_splits', {
+        await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
+        const combineRes = await invoke<Res<ResStatus>>('combine_splits', {
           name: video.title,
           fileType: video.links[index].url.split('.').reverse()[0],
-        })
+        });
+        if (combineRes.data.status !== 'success') {
+          video.status = 'ready'
+          video.links.forEach(link => link.status = '')
+          await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
+          ElMessageBox.alert(video.title, '合并失败', {
+            confirmButtonText: 'OK',
+          })
+          return
+        }
       }).catch(async () => {
         console.log('download error', index)
         video.links[index].status = 'error'

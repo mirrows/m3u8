@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router'
 import { useDownloadHistory } from '@/store/history';
 import { useDownload } from '@/store/download';
 import Nav from '@/components/nav/index.vue'
+import type { Res, Source, VideoMsg } from '@/types/common';
 
 const { invoke } = core
 

@@ -3,11 +3,22 @@
   import { computed, onMounted, ref } from 'vue';
   import { useLanguageStore } from '@/store/language'
   import { useNav } from './store/nav';
+  import { useDownloadHistory } from './store/history';
+  import { useDownload } from './store/download';
 
   const nav = useNav()
   const language = useLanguageStore()
   const locale = computed(() => {
     return language.locale
+  })
+  const history = useDownloadHistory()
+  const download = useDownload()
+
+
+
+  onMounted(async () => {
+    await history.load()
+    await download.load()
   })
 
 </script>
