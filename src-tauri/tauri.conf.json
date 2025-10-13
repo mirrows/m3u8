@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "m3u8_parser",
   "version": "0.1.0",
-  "identifier": "top.t-n.m3u8_parser",
+  "identifier": "top.t-n.m3u8Parser",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:9090",
