@@ -13,8 +13,9 @@ use crate::utils::tools::{
     fetch_and_process, handle_body, query_qualitys, query_ts_list, transform_text, ffmpeg_combine,
 };
 use uuid::Uuid;
+use crate::utils::global_config::GLOBAL_MAP;
 
-static DOWNLOAD_DIR: &str = "E:\\download";
+// static DOWNLOAD_DIR: &str = "E:\\download";
 static FILE_TYPE: &str = "mp4"; // 固定的，要改的话使用新的变量保存，并再次执行ffmpeg
 
 #[tauri::command]
@@ -160,7 +161,8 @@ pub async fn download_video(
 pub async fn download_item(url: String, path: String) -> Result<Res<ResStatus>, String> {
     //  eprintln!("start download video {} to path {}", url,  path);
     // thread::sleep(time::Duration::from_secs(2));
-    let download_path = format!("{}/{}", DOWNLOAD_DIR, path);
+    let download_dir = GLOBAL_MAP.lock().unwrap().get("folder").unwrap().to_string();
+    let download_path = format!("{}/{}", download_dir, path);
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(30)) // 设置请求超时时间
         .build()
@@ -200,8 +202,9 @@ pub async fn download_item(url: String, path: String) -> Result<Res<ResStatus>, 
 pub async fn combine_splits(name: String, file_type: String) -> Result<Res<ResStatus>, String> {
     eprintln!("start combine splits {}.{}", name, file_type);
     thread::sleep(time::Duration::from_secs(2));
-    let input_dir = format!("{}/{}", DOWNLOAD_DIR, name);
-    let output_file_path = format!("{}/video__output/{}.{}", DOWNLOAD_DIR, name, file_type);
+    let download_dir = GLOBAL_MAP.lock().unwrap().get("folder").unwrap().to_string();
+    let input_dir = format!("{}/{}", download_dir, name);
+    let output_file_path = format!("{}/video__output/{}.{}", download_dir, name, file_type);
     let mut init_path = String::new();
     let res = Res {
         code: 0,
@@ -266,7 +269,7 @@ pub async fn combine_splits(name: String, file_type: String) -> Result<Res<ResSt
     writer.flush().await.map_err(|e| e.to_string())?;
 
 
-    let target_path = format!("{}/video__output/{}.{}", DOWNLOAD_DIR, name, FILE_TYPE);
+    let target_path = format!("{}/video__output/{}.{}", download_dir, name, FILE_TYPE);
     ffmpeg_combine(
         &output_file_path,
         &target_path,

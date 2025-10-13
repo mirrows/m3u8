@@ -5,6 +5,7 @@ import { useLanguageStore } from '@/store/language'
 import { computed, onMounted, ref } from 'vue';
 import { useConfig } from '@/store/config'
 import { downloadDir } from '@tauri-apps/api/path';
+import { selectFolder } from '@/utils/tool';
 
 const config = useConfig()
 
@@ -15,13 +16,14 @@ const languageOptions = computed(() => languageKeys.map(key => ({
   value: key
 })))
 
-const setFolder = (e: any) => {
-  console.log(e)
-  // config.setFolder(e.target.files[0].path)
+const onClickFolder = () => {
+  selectFolder().then((folder) => {
+    if (folder) {
+      config.setFolder(folder)
+      console.log(folder)
+    }
+  })
 }
-
-const folderInputRef = ref<HTMLInputElement | null>(null)
-
 
 onMounted(async () => {
   const downloadPath = await downloadDir()
@@ -48,8 +50,7 @@ onMounted(async () => {
     <div class="setting_item">
       <div class="setting_item_name">{{ language.cur.folder }}：</div>
       <div class="setting_item_value">
-        <div class="folder_path" @click="folderInputRef?.click()">{{ config.folder }}</div>
-        <input ref="folderInputRef" class="folder_input" type="file" webkitdirectory multiple @change="setFolder">
+        <div class="folder_path" @click="onClickFolder">{{ config.downloadFolder }}</div>
       </div>
     </div>
     <!-- <div class="setting_empty">{{ language.cur.noSettingItem }}</div> -->
@@ -82,11 +83,12 @@ onMounted(async () => {
 }
 .folder_path{
   width: 300px;
-  height: 30px;
+  height: 32px;
   border: 1px solid #ccc;
   padding: 5px;
   border-radius: 4px;
   cursor: pointer;
+  box-sizing: border-box;
 }
 .folder_input{
   display: none;

@@ -5,6 +5,7 @@
   import { useNav } from './store/nav';
   import { useDownloadHistory } from './store/history';
   import { useDownload } from './store/download';
+  import { useConfig } from './store/config';
 
   const nav = useNav()
   const language = useLanguageStore()
@@ -13,12 +14,14 @@
   })
   const history = useDownloadHistory()
   const download = useDownload()
+  const config = useConfig()
 
 
 
   onMounted(async () => {
     await history.load()
     await download.load()
+    await config.load()
   })
 
 </script>
