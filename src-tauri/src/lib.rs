@@ -12,7 +12,8 @@ pub fn run() {
             api::parse_site,
             api::download_video,
             api::download_item,
-            api::combine_splits
+            api::combine_splits,
+            api::set_config,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

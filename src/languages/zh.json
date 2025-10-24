@@ -14,5 +14,6 @@
   "confirmDelete": "确定删除吗？",
   "confirm": "确定",
   "cancel": "取消",
-  "folder": "文件位置"
+  "folder": "文件位置",
+  "inTheQueue": "队列中... ..."
 }

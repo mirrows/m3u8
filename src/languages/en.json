@@ -14,5 +14,6 @@
   "confirmDelete": "Are you sure you want to delete this?",
   "confirm": "confirm",
   "cancel": "cancel",
-  "folder": "file position"
+  "folder": "file position",
+  "inTheQueue": "In the queue ... ..."
 }

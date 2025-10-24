@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLanguageStore } from '@/store/language';
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus';
-import { computed, reactive, ref } from 'vue';
+import { computed, onUnmounted, reactive, ref } from 'vue';
 import { core } from '@tauri-apps/api'
 import { parseSize } from '@/utils/tool';
 import { useRouter } from 'vue-router'
@@ -9,10 +9,12 @@ import { useDownloadHistory } from '@/store/history';
 import { useDownload } from '@/store/download';
 import Nav from '@/components/nav/index.vue'
 import type { Res, Source, VideoMsg } from '@/types/common';
+import { useNav } from '@/store/nav';
 
 const { invoke } = core
 
 const router = useRouter()
+const nav = useNav()
 const language = useLanguageStore()
 const textarea = ref('')
 const loading = ref(false)
@@ -98,6 +100,10 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
     ElMessage.error('解析失败：' + err);
   })
 }
+
+onUnmounted(() => {
+  nav.setMenu(false)
+})
 </script>
 
 <template>

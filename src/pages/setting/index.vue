@@ -70,7 +70,7 @@ onMounted(async () => {
   font-size: 16px;
 }
 .setting_item_name{
-  width: 160px;
+  width: 100px;
   margin-right: 10px;
   text-align: right;
   color: #333;
@@ -82,7 +82,7 @@ onMounted(async () => {
   color: #999;
 }
 .folder_path{
-  width: 300px;
+  width: 200px;
   height: 32px;
   border: 1px solid #ccc;
   padding: 5px;

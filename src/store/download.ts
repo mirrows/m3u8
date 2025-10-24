@@ -5,6 +5,7 @@ import { core } from '@tauri-apps/api'
 import { wait } from '@/utils/tool'
 import { db } from '@/db'
 import { ElMessageBox } from 'element-plus'
+import { pause } from '@/components/custom-icon/svg-list'
 
 const { invoke } = core
 
@@ -13,9 +14,12 @@ const lines = 10
 
 const downloadList: Record<string, number[]> = {}
 
+
 export const useDownload = defineStore('download', {
   state: () => ({
     list: [] as Source[],
+    deleteLine: {} as Record<string, boolean>,
+    pauseLine: {} as Record<string, Function>,
   }),
   actions: {
     async load() {
@@ -27,9 +31,22 @@ export const useDownload = defineStore('download', {
       this.list.unshift(res)
       this.startDownload()
     },
+    pause(download: Source) {
+      download.status = 'paused'
+      this.startDownload()
+    },
+    resume(download: Source) {
+      download.status = 'ready'
+      this.pauseLine[download.id]?.()
+      delete this.pauseLine[download.id]
+    },
     async remove(download: Source) {
+      if (download.status === 'downloading') {
+        this.deleteLine[download.id] = true
+      }
       this.list = this.list.filter(item => item.id !== download.id)
       await db.downloadList.delete(download.id)
+      this.startDownload()
     },
     async update(download: Partial<Source>) {
       const item = this.list.find(item => item.id === download.id)
@@ -46,6 +63,14 @@ export const useDownload = defineStore('download', {
       const waiter = new Waiter()
       await db.downloadList.put({ ...startItem, links: startItem.links.map(link => ({ ...link, url: '' })) })
       for (let i = 0; i < startItem.links.length; i++) {
+        // 检查是否已删除
+        if (this.deleteLine[startItem.id]) {
+          delete this.deleteLine[startItem.id]
+          break
+        }
+        if (startItem.status === 'paused') {
+          await new Promise(resolve => this.pauseLine[startItem.id] = resolve);
+        }
         if (startItem.links[i].status === 'done') continue
         // console.log(startItem.title, 'map:', downloadList[startItem.title])
         if (downloadList[startItem.title] && downloadList[startItem.title].length > lines) {

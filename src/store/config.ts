@@ -1,5 +1,7 @@
 
+import type { Res, ResStatus } from '@/types/common'
 import { getDownloadDir } from '@/utils/tool'
+import { invoke } from '@tauri-apps/api/core'
 import { defineStore } from 'pinia'
 
 export const useConfig = defineStore('config', {
@@ -24,10 +26,16 @@ export const useConfig = defineStore('config', {
         }
         this.downloadFolder = config.downloadFolder || defaultDownloadFolder
       }
+      invoke<Res<ResStatus>>('set_config', {
+        downloadFolder: this.downloadFolder,
+      })
     },
     setFolder(folder: string) {
       this.downloadFolder = folder
       localStorage.setItem('config', JSON.stringify(this.$state))
+      invoke<Res<ResStatus>>('set_config', {
+        downloadFolder: this.downloadFolder,
+      })
     },
   }
 })

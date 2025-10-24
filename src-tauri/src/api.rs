@@ -312,3 +312,19 @@ pub async fn combine_splits(name: String, file_type: String) -> Result<Res<ResSt
 
     Ok(res)
 }
+
+#[tauri::command]
+pub async fn set_config(download_folder: String) -> Result<Res<ResStatus>, String> {
+    let mut map = GLOBAL_MAP.lock().unwrap();
+    let new_folder = &download_folder.to_string();
+    map.insert("folder".to_string(), download_folder);
+    let res = Res {
+        code: 0,
+        data: ResStatus {
+            status: "done".to_string(),
+            err_msg: "".to_string(),
+        },
+        msg: format!("set download folder to {}", new_folder),
+    };
+    Ok(res)
+}
