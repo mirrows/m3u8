@@ -6,7 +6,7 @@ import { onMounted } from 'vue'
 const nav = useNav()
 
 const initMenu = () => {
-  nav.setMenu(document.body.offsetWidth < 768)
+  nav.setMenu(document.body.offsetWidth > 768)
 }
 
 onMounted(() => {

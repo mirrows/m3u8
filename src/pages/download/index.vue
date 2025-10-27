@@ -45,7 +45,7 @@ const deleteVideo = (item: Source) => {
               <el-icon v-if="item.status === 'paused'" class="operate_icon" @click="download.resume(item)"><CustomIcon icon="play" /></el-icon>
               <el-icon v-else class="operate_icon" @click="download.pause(item)"><CustomIcon icon="pause" /></el-icon>
             </template>
-            <div v-else>{{ language.cur.inTheQueue }}</div>
+            <div v-else class="inqueue_tips">{{ language.cur.inTheQueue }}</div>
             <el-icon class="operate_icon" @click="deleteVideo(item)"><CloseBold /></el-icon>
           </div>
         </div>
@@ -116,5 +116,8 @@ const deleteVideo = (item: Source) => {
   text-align: center;
   font-size: 16px;
   color: #999;
+}
+.inqueue_tips{
+  white-space: nowrap;
 }
 </style>

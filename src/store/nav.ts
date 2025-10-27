@@ -4,7 +4,7 @@ import { defineStore } from 'pinia'
 export const useNav = defineStore('nav', {
   state: () => ({
     header: false,
-    menu: true,
+    menu: false,
   }),
   actions: {
     setHeader(show: boolean) {

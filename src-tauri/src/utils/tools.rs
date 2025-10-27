@@ -99,6 +99,13 @@ pub fn query_qualitys(body: &str, base_url: &str) -> Vec<Quality> {
             url: complete_url(&base_url, &capture[3].to_string()),
         });
     }
+    if vec.is_empty() {
+        vec.push(Quality {
+            name: "default".to_string(),
+            size: "0".to_string(),
+            url: base_url.to_string(),
+        })
+    }
     vec
 }
 

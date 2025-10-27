@@ -21,9 +21,9 @@ const menuList = computed(() => ([
   {
     icon: Download,
     title: language.cur.downloadList,
-    tagNum: download.list.length,
+    tagNum: download.list.filter(item => item.status !== 'done').length,
     fn: () => {
-    nav.toggleMenu()
+    nav.setMenu(false)
     router.push({
       name: 'download',
     });
@@ -32,7 +32,7 @@ const menuList = computed(() => ([
     icon: Setting,
     title: language.cur.setting,
     fn: () => {
-      nav.toggleMenu()
+      nav.setMenu(false)
       router.push({
         name: 'setting',
       });
@@ -42,7 +42,7 @@ const menuList = computed(() => ([
 </script>
 
 <template>
-  <div class="m_menu" :class="{'collapsed': nav.menu}">
+  <div class="m_menu" :class="{'collapsed': !nav.menu}">
     <div class="m_close_menu" @click="nav.toggleMenu">
       <el-icon
         class="icon-primary"

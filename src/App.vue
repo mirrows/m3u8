@@ -71,7 +71,7 @@
 }
 .m_wrap{
   padding: 0;
-  overflow: visible;
+  overflow: auto;
 }
 .flex {
   display: flex;
