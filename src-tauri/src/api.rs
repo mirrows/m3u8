@@ -215,6 +215,15 @@ pub async fn combine_splits(name: String, file_type: String) -> Result<Res<ResSt
         msg: name.to_string(),
     };
 
+    let output_file_path_p = Path::new(&output_file_path);
+
+    // 获取父目录路径 d://download/test
+    if let Some(parent_dir) = output_file_path_p.parent() {
+        // 创建目录（如果不存在）
+        fs::create_dir_all(parent_dir)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
     // 创建输出文件（异步）
     let output_file = File::create(&output_file_path)
         .await
@@ -310,5 +319,21 @@ pub async fn combine_splits(name: String, file_type: String) -> Result<Res<ResSt
     //     res.data.err_msg = format!("FFmpeg 合并失败: {}", name);
     // }
 
+    Ok(res)
+}
+
+#[tauri::command]
+pub async fn set_config(download_folder: String) -> Result<Res<ResStatus>, String> {
+    let mut map = GLOBAL_MAP.lock().unwrap();
+    let new_folder = &download_folder.to_string();
+    map.insert("folder".to_string(), download_folder);
+    let res = Res {
+        code: 0,
+        data: ResStatus {
+            status: "done".to_string(),
+            err_msg: "".to_string(),
+        },
+        msg: format!("set download folder to {}", new_folder),
+    };
     Ok(res)
 }

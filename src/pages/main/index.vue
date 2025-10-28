@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useLanguageStore } from '@/store/language';
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus';
-import { computed, reactive, ref } from 'vue';
+import { computed, onUnmounted, reactive, ref } from 'vue';
 import { core } from '@tauri-apps/api'
 import { parseSize } from '@/utils/tool';
 import { useRouter } from 'vue-router'
@@ -9,10 +9,12 @@ import { useDownloadHistory } from '@/store/history';
 import { useDownload } from '@/store/download';
 import Nav from '@/components/nav/index.vue'
 import type { Res, Source, VideoMsg } from '@/types/common';
+import { useNav } from '@/store/nav';
 
 const { invoke } = core
 
 const router = useRouter()
+const nav = useNav()
 const language = useLanguageStore()
 const textarea = ref('')
 const loading = ref(false)
@@ -46,7 +48,6 @@ const submit = () => {
     url: textarea.value,
   }).then((res) => {
     loading.value = false;
-    console.log(res);
     if (res.code === 0) {
       const video = {
         ...res.data,
@@ -56,7 +57,6 @@ const submit = () => {
           sizeStr: parseSize(+item.size),
         })),
       }
-      console.log(34535, dHistory)
       dHistory.add(video);
       curVideo.value = video;
 
@@ -74,10 +74,8 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
     text: '正在解析链接... ...',
     background: 'rgba(255, 255, 255, 0.7)',
   })
-  console.log({ ...curVideo.value, ...quality })
   invoke<Res<Source>>('download_video', { ...curVideo.value, ...quality, title: curVideo.value.name }).then((res) => {
     loading.close();
-    console.log(res);
     // ElMessage.success('解析成功，即将开始下载');
     curVideo.value = {} as VideoMsg
     download.add({
@@ -85,7 +83,8 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
       status: 'ready',
     })
     ElMessageBox.confirm('解析成功，即将开始下载，是否跳转下载列表?')
-    .then((res) => {
+      .then((res) => {
+      nav.setMenu(false)
       router.push({
         name: 'download',
       })
@@ -98,83 +97,90 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
     ElMessage.error('解析失败：' + err);
   })
 }
+
 </script>
 
 <template>
   <div class="main_wrap">
-    <el-image
-      class="header_img"
-      loading="lazy"
-      src="/logo.png"
-      fit="cover"
-    />
-    <el-main>
-      <el-space direction="vertical" fill class="main_space">
-        <el-input
-          v-model="textarea"
-          :rows="5"
-          type="textarea"
-          class="url_textarea"
-          :placeholder="curLanguage.placeholder"
-        />
-        <el-button :loading="loading" type="primary" @click="submit">{{curLanguage.submit}}</el-button>
-        <div v-if="historyList.length > 0" class="history_wrap">
-          <el-row>
-            <el-col :span="24">
-              <div class="history_title">{{curLanguage.history}}</div>
-            </el-col>
-          </el-row>
-          <el-row v-for="history in historyList" class="history_row" @click="curVideo = history">
-            <el-col :span="18" class="flex">
-              <div class="grid-content ep-bg-purple-dark video_title">
-                <div class="two_line">{{ history.name }}</div>
-                <div class="oneline history_tip">{{ history.url }}</div>
-                <div class="oneline history_tip">{{ history.timeStr }}</div>
-              </div>
-            </el-col>
-            <el-col :span="6" style="text-align: right;">
-              <div class="poster_width_wrap">
-                <div class="poster_wrap" @click.stop>
-                  <el-image
-                    :preview-src-list="[history.posterUrl]"
-                    class="poster"
-                    loading="lazy"
-                    :src="history.posterUrl"
-                    fit="cover"
-                  />
+    <div class="fixed_height m_custom_scroller">
+      <el-image
+        class="header_img"
+        loading="lazy"
+        src="/logo.png"
+        fit="cover"
+      />
+      <el-main>
+        <el-space direction="vertical" fill class="main_space">
+          <el-input
+            v-model="textarea"
+            :rows="5"
+            type="textarea"
+            class="url_textarea"
+            :placeholder="curLanguage.placeholder"
+          />
+          <el-button :loading="loading" type="primary" @click="submit">{{curLanguage.submit}}</el-button>
+          <div v-if="historyList.length > 0" class="history_wrap">
+            <el-row>
+              <el-col :span="24">
+                <div class="history_title">{{curLanguage.history}}</div>
+              </el-col>
+            </el-row>
+            <el-row v-for="history in historyList" class="history_row" @click="curVideo = history">
+              <el-col :span="18" class="flex">
+                <div class="grid-content ep-bg-purple-dark video_title">
+                  <div class="two_line">{{ history.name }}</div>
+                  <div class="oneline history_tip">{{ history.url }}</div>
+                  <div class="oneline history_tip">{{ history.timeStr }}</div>
                 </div>
-              </div>
-            </el-col>
-          </el-row>
+              </el-col>
+              <el-col :span="6" style="text-align: right;">
+                <div class="poster_width_wrap">
+                  <div class="poster_wrap" @click.stop>
+                    <el-image
+                      :preview-src-list="[history.posterUrl]"
+                      class="poster"
+                      loading="lazy"
+                      :src="history.posterUrl"
+                      fit="cover"
+                    />
+                  </div>
+                </div>
+              </el-col>
+            </el-row>
+          </div>
+        </el-space>
+        <div class="quality_drawer">
+          <el-drawer v-model="drawer" direction="btt" :with-header="false" resizable>
+            <el-row>
+              <el-col :span="24">
+                <div class="drawer_title oneline">{{ curVideo.name }}</div>
+              </el-col>
+            </el-row>
+            <el-row>
+              <el-col :span="24" v-for="(quality, i) in curVideo.quality" :key="i" class="quality_item" @click="downloadVideo(quality)">
+                <div class="drawer_item oneline">{{ quality.name }}</div>
+                <!-- <el-tag
+                  type="info"
+                  effect="dark"
+                  size="small"
+                >
+                  {{ quality.sizeStr }}
+                </el-tag> -->
+              </el-col>
+            </el-row>
+          </el-drawer>
         </div>
-      </el-space>
-      <div class="quality_drawer">
-        <el-drawer v-model="drawer" direction="btt" :with-header="false" resizable>
-          <el-row>
-            <el-col :span="24">
-              <div class="drawer_title oneline">{{ curVideo.name }}</div>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="24" v-for="(quality, i) in curVideo.quality" :key="i" class="quality_item" @click="downloadVideo(quality)">
-              <div class="drawer_item oneline">{{ quality.name }}</div>
-              <el-tag
-                type="info"
-                effect="dark"
-                size="small"
-              >
-                {{ quality.sizeStr }}
-              </el-tag>
-            </el-col>
-          </el-row>
-        </el-drawer>
-      </div>
-    </el-main>
+      </el-main>
+    </div>
     <Nav />
   </div>
 </template>
 
 <style scoped>
+.fixed_height{
+  height: 100vh;
+  overflow: auto;
+}
 .header_img{
   height: 200px;
   width: 100%;

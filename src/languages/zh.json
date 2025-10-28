@@ -15,6 +15,7 @@
   "confirm": "确定",
   "cancel": "取消",
   "folder": "文件位置",
+  "inTheQueue": "队列中... ...",
   "maxTasks": "最大任务数",
   "maxProcess": "最大进程数"
 }

@@ -29,7 +29,7 @@ export const confirmD = ({ cb, msg = '' }: ConfirmDeleteParams) => {
       await cb()
       resolve(true)
     }).catch(() => {
-      console.log('删除已取消')
+      console.log('已取消')
       reject(false)
     })
   })

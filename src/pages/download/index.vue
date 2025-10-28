@@ -41,8 +41,11 @@ const deleteVideo = (item: Source) => {
         <div class="download_list_item_firstline">
           <div class="download_list_item_title">{{ item.title }}</div>
           <div v-if="item.status !== 'done'" class="download_list_item_operate">
-            <el-icon v-if="item.status === 'paused'" class="operate_icon"><CustomIcon icon="play" /></el-icon>
-            <el-icon v-else class="operate_icon"><CustomIcon icon="pause" /></el-icon>
+            <template v-if="item.status !== 'ready'">
+              <el-icon v-if="item.status === 'paused'" class="operate_icon" @click="download.resume(item)"><CustomIcon icon="play" /></el-icon>
+              <el-icon v-else class="operate_icon" @click="download.pause(item)"><CustomIcon icon="pause" /></el-icon>
+            </template>
+            <div v-else class="inqueue_tips">{{ language.cur.inTheQueue }}</div>
             <el-icon class="operate_icon" @click="deleteVideo(item)"><CloseBold /></el-icon>
           </div>
         </div>
@@ -92,6 +95,7 @@ const deleteVideo = (item: Source) => {
 .download_list_item_operate{
   display: flex;
   margin-left: auto;
+  align-items: center;
 }
 .operate_icon{
   padding: 0 10px;
@@ -112,5 +116,8 @@ const deleteVideo = (item: Source) => {
   text-align: center;
   font-size: 16px;
   color: #999;
+}
+.inqueue_tips{
+  white-space: nowrap;
 }
 </style>

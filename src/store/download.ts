@@ -6,16 +6,18 @@ import { wait } from '@/utils/tool'
 import { db } from '@/db'
 import { ElMessageBox } from 'element-plus'
 import { useConfig } from './config'
+import { pause } from '@/components/custom-icon/svg-list'
 
 const { invoke } = core
 
-const lines = 10
-
 const downloadList: Record<string, number[]> = {}
+
 
 export const useDownload = defineStore('download', {
   state: () => ({
     list: [] as Source[],
+    deleteLine: {} as Record<string, boolean>,
+    pauseLine: {} as Record<string, Function[]>,
   }),
   actions: {
     async load() {
@@ -27,9 +29,25 @@ export const useDownload = defineStore('download', {
       this.list.unshift(res)
       this.startDownload()
     },
+    pause(download: Source) {
+      download.status = 'paused'
+      this.startDownload()
+    },
+    resume(download: Source) {
+      download.status = 'ready'
+      // this.pauseLine[download.id]?.forEach(res => {
+      //   res()
+      // })
+      // delete this.pauseLine[download.id]
+      this.startDownload()
+    },
     async remove(download: Source) {
+      if (download.status === 'downloading') {
+        this.deleteLine[download.id] = true
+      }
       this.list = this.list.filter(item => item.id !== download.id)
       await db.downloadList.delete(download.id)
+      this.startDownload()
     },
     async update(download: Partial<Source>) {
       const item = this.list.find(item => item.id === download.id)
@@ -47,6 +65,16 @@ export const useDownload = defineStore('download', {
       const waiter = new Waiter()
       await db.downloadList.put({ ...startItem, links: startItem.links.map(link => ({ ...link, url: '' })) })
       for (let i = 0; i < startItem.links.length; i++) {
+        // 检查是否已删除
+        if (this.deleteLine[startItem.id]) {
+          delete this.deleteLine[startItem.id]
+          return
+        }
+        if (startItem.status === 'paused') {
+          // await new Promise(resolve => this.pauseLine[startItem.id] = [...(this.pauseLine[startItem.id] || []), resolve]);
+          this.pauseDownload(startItem)
+          return
+        }
         if (startItem.links[i].status === 'done') continue
         // console.log(startItem.title, 'map:', downloadList[startItem.title])
         if (downloadList[startItem.title] && downloadList[startItem.title].length >= config.process) {
@@ -57,16 +85,22 @@ export const useDownload = defineStore('download', {
     },
     downloadItem(video: Source, index: number, waiter: Waiter) {
       video.links[index].status = 'padding'
-      downloadList[video.title] = [...(downloadList[video.title] || []), index]
+      downloadList[video.id] = [...(downloadList[video.id] || []), index]
       const path = `${video.title}/${String(index).padStart(5, '0')}${video.links[index].url.split('/').reverse()[0]}`
       return invoke<Res<ResStatus>>('download_item', {
         url: video.links[index].url,
         path,
       }).then(async (res) => {
+        if (!this.list.some(v => v.id === video.id)) return
+        if (video.status === 'paused') {
+          // await new Promise(resolve => this.pauseLine[video.id] = [...(this.pauseLine[video.id] || []), resolve]);
+          this.pauseDownload(video)
+          return
+        }
         // console.log('download Finished', index)
         video.links[index].status = res.data.status
-        const ind = downloadList[video.title].findIndex(ind => ind === index)
-        downloadList[video.title].splice(ind, 1)
+        const ind = downloadList[video.id].findIndex(ind => ind === index)
+        downloadList[video.id].splice(ind, 1)
         await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
         waiter.emit()
         if (!video.links.every(link => link.status === 'done')) return
@@ -77,7 +111,7 @@ export const useDownload = defineStore('download', {
           name: video.title,
           fileType: video.links[index].url.split('.').reverse()[0],
         });
-        if (combineRes.data.status !== 'success') {
+        if (combineRes.code !== 0) {
           video.status = 'ready'
           video.links.forEach(link => link.status = '')
           await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
@@ -87,14 +121,22 @@ export const useDownload = defineStore('download', {
           return
         }
       }).catch(async () => {
-        console.log('download error', index)
+        // console.log('download error', index)
+        if (video.status === 'paused') {
+          this.pauseDownload(video)
+          // await new Promise(resolve => this.pauseLine[video.id] = [...(this.pauseLine[video.id] || []), resolve]);
+          return
+        }
         video.links[index].status = 'error'
-        const ind = downloadList[video.title].findIndex(ind => ind === index)
-        downloadList[video.title].splice(ind, 1)
+        const ind = downloadList[video.id].findIndex(ind => ind === index)
+        downloadList[video.id].splice(ind, 1)
         await wait()
         await this.downloadItem(video, index, waiter)
         return
       })
+    },
+    pauseDownload(video: Source) {
+      delete downloadList[video.id]
     }
   }
 })

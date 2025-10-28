@@ -15,6 +15,7 @@
   "confirm": "confirm",
   "cancel": "cancel",
   "folder": "file position",
+  "inTheQueue": "In the queue ... ...",
   "maxTasks": "max tasks",
   "maxProcess": "max process"
 }
