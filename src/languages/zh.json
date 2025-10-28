@@ -14,5 +14,7 @@
   "confirmDelete": "确定删除吗？",
   "confirm": "确定",
   "cancel": "取消",
-  "folder": "文件位置"
+  "folder": "文件位置",
+  "maxTasks": "最大任务数",
+  "maxProcess": "最大进程数"
 }

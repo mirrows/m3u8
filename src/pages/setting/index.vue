@@ -16,6 +16,16 @@ const languageOptions = computed(() => languageKeys.map(key => ({
   value: key
 })))
 
+const tasks = computed({
+  get: () => config.tasks,
+  set: (val) => config.setConfig({ tasks: val })
+})
+
+const process = computed({
+  get: () => config.process,
+  set: (val) => config.setConfig({ process: val })
+})
+
 const onClickFolder = () => {
   selectFolder().then((folder) => {
     if (folder) {
@@ -51,6 +61,18 @@ onMounted(async () => {
       <div class="setting_item_name">{{ language.cur.folder }}：</div>
       <div class="setting_item_value">
         <div class="folder_path" @click="onClickFolder">{{ config.downloadFolder }}</div>
+      </div>
+    </div>
+    <div class="setting_item">
+      <div class="setting_item_name">{{ language.cur.maxTasks }}：</div>
+      <div class="setting_item_value">
+        <el-input v-model="tasks" type="number" style="width: 120px" />
+      </div>
+    </div>
+    <div class="setting_item">
+      <div class="setting_item_name">{{ language.cur.maxProcess }}：</div>
+      <div class="setting_item_value">
+        <el-input v-model="process" type="number" style="width: 120px" />
       </div>
     </div>
     <!-- <div class="setting_empty">{{ language.cur.noSettingItem }}</div> -->

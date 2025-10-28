@@ -5,10 +5,10 @@ import { core } from '@tauri-apps/api'
 import { wait } from '@/utils/tool'
 import { db } from '@/db'
 import { ElMessageBox } from 'element-plus'
+import { useConfig } from './config'
 
 const { invoke } = core
 
-const process = 3
 const lines = 10
 
 const downloadList: Record<string, number[]> = {}
@@ -39,7 +39,8 @@ export const useDownload = defineStore('download', {
       await db.downloadList.put({ ...res, links: res.links.map(link => ({ ...link, url: '' })) })
     },
     async startDownload() {
-      if (this.list.filter(item => item.status === 'downloading').length >= process) return
+      const config = useConfig()
+      if (this.list.filter(item => item.status === 'downloading').length >= config.tasks) return
       const startItem = this.list.find(item => item.status === 'ready')
       if (!startItem) return
       startItem.status = 'downloading'
@@ -48,7 +49,7 @@ export const useDownload = defineStore('download', {
       for (let i = 0; i < startItem.links.length; i++) {
         if (startItem.links[i].status === 'done') continue
         // console.log(startItem.title, 'map:', downloadList[startItem.title])
-        if (downloadList[startItem.title] && downloadList[startItem.title].length > lines) {
+        if (downloadList[startItem.title] && downloadList[startItem.title].length >= config.process) {
           await waiter.wait()
         }
         this.downloadItem(startItem, i, waiter)
