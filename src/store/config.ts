@@ -2,13 +2,20 @@
 import type { Res, ResStatus } from '@/types/common'
 import { getDownloadDir } from '@/utils/tool'
 import { invoke } from '@tauri-apps/api/core'
+import { ElMessageBox } from 'element-plus'
 import { defineStore } from 'pinia'
+import { platform } from '@tauri-apps/plugin-os';
+import { open } from '@tauri-apps/plugin-shell';
+import { Check } from '@element-plus/icons-vue'
+import { useLanguageStore } from './language'
 
 export const useConfig = defineStore('config', {
   state: () => ({
     downloadFolder: '',
     tasks: 3,
     process: 10,
+    available: false,
+    platform: platform(),
   }),
   actions: {
     async load() {
@@ -19,20 +26,40 @@ export const useConfig = defineStore('config', {
         console.error('加载配置失败:', err)
         config = null
       }
+      let defaultDownloadFolder = ''
+      try {
+        defaultDownloadFolder = await getDownloadDir()
+      } catch (err) {
+        console.error('获取默认下载目录失败:', err)
+      }
+      if (defaultDownloadFolder) {
+        this.downloadFolder = defaultDownloadFolder
+      }
       if (config) {
-        let defaultDownloadFolder = ''
-        try {
-          defaultDownloadFolder = await getDownloadDir()
-        } catch (err) {
-          console.error('获取默认下载目录失败:', err)
-        }
-        this.downloadFolder = config.downloadFolder || defaultDownloadFolder
+        this.downloadFolder = config.downloadFolder || this.downloadFolder
         this.tasks = config.tasks || this.tasks
         this.process = config.process || this.process
       }
       invoke<Res<ResStatus>>('set_config', {
         downloadFolder: this.downloadFolder,
       })
+      this.checkAvailable()
+    },
+    async checkAvailable() {
+      const language = useLanguageStore()
+      try {
+        await invoke<Res<ResStatus>>('ffmpeg_installed')
+        this.available = true
+      } catch (err) {
+        this.available = false
+        ElMessageBox.confirm(language.cur.needFFmpeg, {
+          confirmButtonText: language.cur.goDownload,
+        })
+          .then((res) => {
+            // 唤起浏览器，跳转链接
+            open ('https://ffmpeg.org/download.html')
+          })
+      }
     },
     setFolder(folder: string) {
       this.downloadFolder = folder

@@ -9,11 +9,12 @@ use std::{
 use tokio::fs::{self, File};
 use tokio::io::{AsyncReadExt, AsyncWriteExt, BufReader, BufWriter};
 
+use crate::utils::global_config::GLOBAL_MAP;
 use crate::utils::tools::{
-    fetch_and_process, handle_body, query_qualitys, query_ts_list, transform_text, ffmpeg_combine,
+    check_ffmpeg_installed, fetch_and_process, ffmpeg_combine, handle_body, query_qualitys,
+    query_ts_list, transform_text,
 };
 use uuid::Uuid;
-use crate::utils::global_config::GLOBAL_MAP;
 
 // static DOWNLOAD_DIR: &str = "E:\\download";
 static FILE_TYPE: &str = "mp4"; // 固定的，要改的话使用新的变量保存，并再次执行ffmpeg
@@ -161,7 +162,12 @@ pub async fn download_video(
 pub async fn download_item(url: String, path: String) -> Result<Res<ResStatus>, String> {
     //  eprintln!("start download video {} to path {}", url,  path);
     // thread::sleep(time::Duration::from_secs(2));
-    let download_dir = GLOBAL_MAP.lock().unwrap().get("folder").unwrap().to_string();
+    let download_dir = GLOBAL_MAP
+        .lock()
+        .unwrap()
+        .get("folder")
+        .unwrap()
+        .to_string();
     let download_path = format!("{}/{}", download_dir, path);
     let client = reqwest::Client::builder()
         .timeout(Duration::from_secs(30)) // 设置请求超时时间
@@ -202,7 +208,12 @@ pub async fn download_item(url: String, path: String) -> Result<Res<ResStatus>, 
 pub async fn combine_splits(name: String, file_type: String) -> Result<Res<ResStatus>, String> {
     eprintln!("start combine splits {}.{}", name, file_type);
     thread::sleep(time::Duration::from_secs(2));
-    let download_dir = GLOBAL_MAP.lock().unwrap().get("folder").unwrap().to_string();
+    let download_dir = GLOBAL_MAP
+        .lock()
+        .unwrap()
+        .get("folder")
+        .unwrap()
+        .to_string();
     let input_dir = format!("{}/{}", download_dir, name);
     let output_file_path = format!("{}/video__output/{}.{}", download_dir, name, file_type);
     let mut init_path = String::new();
@@ -277,14 +288,8 @@ pub async fn combine_splits(name: String, file_type: String) -> Result<Res<ResSt
     // 确保缓冲区写入磁盘
     writer.flush().await.map_err(|e| e.to_string())?;
 
-
     let target_path = format!("{}/video__output/{}.{}", download_dir, name, FILE_TYPE);
-    ffmpeg_combine(
-        &output_file_path,
-        &target_path,
-        &init_path,
-        &file_type
-    ).await?;
+    ffmpeg_combine(&output_file_path, &target_path, &init_path, &file_type).await?;
 
     // 拼接 concat 协议格式路径
     // let concat_input = if file_type == "m4s" {
@@ -336,4 +341,10 @@ pub async fn set_config(download_folder: String) -> Result<Res<ResStatus>, Strin
         msg: format!("set download folder to {}", new_folder),
     };
     Ok(res)
+}
+
+#[tauri::command]
+pub fn ffmpeg_installed() -> Result<String, String> {
+    // 尝试执行 "ffmpeg -version" 来检查 FFmpeg 是否已安装
+    check_ffmpeg_installed()
 }

@@ -17,5 +17,8 @@
   "folder": "文件位置",
   "inTheQueue": "队列中... ...",
   "maxTasks": "最大任务数",
-  "maxProcess": "最大进程数"
+  "maxProcess": "最大进程数",
+  "startService": "启动服务",
+  "needFFmpeg": "当前系统需要安装ffmpeg，请检查是否已安装并配置好PATH",
+  "goDownload": "去下载"
 }

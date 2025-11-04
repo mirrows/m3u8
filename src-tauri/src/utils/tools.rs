@@ -3,10 +3,10 @@ use regex::Regex;
 use reqwest::header::{HeaderMap, HeaderValue}; // 添加此行导入头相关类型
 use reqwest::Client;
 use std::cmp;
+use std::process::Command;
+use std::{thread, time};
 use tokio::fs;
 use tokio::time::{sleep, Duration};
-use std::{thread, time};
-use std::process::Command;
 
 pub fn replace_url(url: String, filenames: Vec<String>) -> Vec<String> {
     let parts = url.split("/").collect::<Vec<&str>>();
@@ -146,7 +146,12 @@ pub fn query_ts_list(body: &str, base_url: &str) -> Vec<String> {
     vec
 }
 
-pub async fn ffmpeg_combine(source_path: &str, target_path: &str, init_path: &str, source_type: &str) -> Result<ResStatus, String> {
+pub async fn ffmpeg_combine(
+    source_path: &str,
+    target_path: &str,
+    init_path: &str,
+    source_type: &str,
+) -> Result<ResStatus, String> {
     let mut times = 0;
     let mut res = ResStatus {
         status: "done".to_string(),
@@ -163,14 +168,7 @@ pub async fn ffmpeg_combine(source_path: &str, target_path: &str, init_path: &st
         // let output_final_file_path = format!("{}/video__output/{}.{}", DOWNLOAD_DIR, name, FILE_TYPE);
         // 调用 ffmpeg
         let status = Command::new("ffmpeg")
-            .args(&[
-                "-i",
-                &concat_input,
-                "-c",
-                "copy",
-                "-y",
-                &target_path,
-            ])
+            .args(&["-i", &concat_input, "-c", "copy", "-y", &target_path])
             .status()
             .expect("failed to execute ffmpeg");
 
@@ -193,4 +191,20 @@ pub async fn ffmpeg_combine(source_path: &str, target_path: &str, init_path: &st
         }
     }
     Ok(res)
+}
+
+pub fn check_ffmpeg_installed() -> Result<String, String> {
+    // 尝试执行 "ffmpeg -version" 来检查 FFmpeg 是否已安装
+    let output = Command::new("ffmpeg").arg("-version").output();
+
+    match output {
+        Ok(output) if output.status.success() => {
+            // FFmpeg 已安装
+            Ok(String::from("FFmpeg is installed"))
+        }
+        _ => {
+            // FFmpeg 未安装，显示提示
+            Err("FFmpeg not installed".to_string())
+        }
+    }
 }

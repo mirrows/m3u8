@@ -4,6 +4,7 @@ pub mod utils;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
@@ -14,6 +15,7 @@ pub fn run() {
             api::download_item,
             api::combine_splits,
             api::set_config,
+            api::ffmpeg_installed,
         ])
         .setup(|app| {
             if cfg!(debug_assertions) {

@@ -6,6 +6,7 @@
   import { useDownloadHistory } from './store/history';
   import { useDownload } from './store/download';
   import { useConfig } from './store/config';
+import { languageKeys } from './languages';
 
   const nav = useNav()
   const language = useLanguageStore()
@@ -15,6 +16,16 @@
   const history = useDownloadHistory()
   const download = useDownload()
   const config = useConfig()
+
+
+  const languageOptions = computed(() => languageKeys.map(key => ({
+    label: language.cur[key],
+    value: key
+  })))
+
+  const available = computed(() => {
+    return config.available
+  })
 
 
 
@@ -48,7 +59,20 @@
       </el-header>
       <div class="m_main">
         <Menu />
-        <el-main class="m_wrap m_custom_scroller">
+        <div class="head_line">
+          <el-select
+            v-model="language.curStr"
+            placeholder="Select"
+            :options="languageOptions"
+            style="width: 100px"
+            @change="language.setLocale"
+          ></el-select>
+        </div>
+        <div v-if="!config.available" class="service_start_wrap">
+          <div class="service_start_tips">{{ language.cur.startService }}</div>
+          <el-switch v-model="available" @change="config.checkAvailable" />
+        </div>
+        <el-main v-else class="m_wrap m_custom_scroller">
           <router-view />
         </el-main>
       </div>
@@ -86,5 +110,28 @@
   display: flex;
   min-height: 100vh;
   height: 100%;
+}
+.head_line {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  margin: 20px auto;
+  width: 80%;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+.service_start_wrap{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 10% auto;
+  text-align: center;
+}
+.service_start_tips{
+  font-family: 'Yesteryear', 'Pfzf', '微软雅黑';
+  font-size: 32px;
+  color: #a8a8a8;
 }
 </style>

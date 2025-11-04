@@ -17,5 +17,8 @@
   "folder": "file position",
   "inTheQueue": "In the queue ... ...",
   "maxTasks": "max tasks",
-  "maxProcess": "max process"
+  "maxProcess": "max process",
+  "startService": "start the service",
+  "needFFmpeg": "current system needs to install ffmpeg, please check if it is installed and configured PATH",
+  "goDownload": "go download"
 }
