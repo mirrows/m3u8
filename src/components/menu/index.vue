@@ -7,8 +7,7 @@ import { useDownload } from '@/store/download';
 import { computed } from 'vue';
 
 const router = useRouter()
-
-const { Download, Setting } = Icons
+const { Download, Setting, TakeawayBox } = Icons
 
 const nav = useNav()
 
@@ -29,6 +28,15 @@ const menuList = computed(() => ([
     });
   }},
   {
+    icon: TakeawayBox,
+    title: language.cur.tools,
+    fn: () => {
+      router.push({
+        name: 'tools',
+      });
+    }
+  },
+  {
     icon: Setting,
     title: language.cur.setting,
     fn: () => {
@@ -39,6 +47,13 @@ const menuList = computed(() => ([
     }
   }
 ]))
+
+const goIndex = () => {
+  nav.setMenu(true)
+  router.push({
+    name: 'main',
+  });
+}
 </script>
 
 <template>
@@ -52,7 +67,7 @@ const menuList = computed(() => ([
       </el-icon>
     </div>
     <div class="m_menu_content">
-      <div class="m_menu_header">
+      <div class="m_menu_header" @click="goIndex">
         <img src="@/assets/img/logo.svg" class="m_logo_in_menu" alt="logo">
         <div class="m_menu_title">M3u8 Parser</div>
       </div>
@@ -111,6 +126,7 @@ const menuList = computed(() => ([
   display: flex;
   align-items: center;
   padding: 10px;
+  cursor: pointer;
 }
 .m_menu_icon{
   margin-right: 10px;

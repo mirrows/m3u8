@@ -18,6 +18,16 @@ const router = createRouter({
       name: 'setting',
       component: () => import('@/pages/setting/index.vue'),
     },
+    {
+      path: '/tools',
+      name: 'tools',
+      component: () => import('@/pages/tools/index.vue'),
+    },
+    {
+      path: '/combine',
+      name: 'combine',
+      component: () => import('@/pages/tools/combine.vue'),
+    },
   ],
 })
 

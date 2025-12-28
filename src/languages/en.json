@@ -17,5 +17,13 @@
   "folder": "file position",
   "inTheQueue": "In the queue ... ...",
   "maxTasks": "max tasks",
-  "maxProcess": "max process"
+  "maxProcess": "max process",
+  "tools": "tools",
+  "combine2mp4": "combine to mp4",
+  "sourcePath": "source path",
+  "targetPath": "target path",
+  "combine": "combine",
+  "completeMsg": "complete form before you do next step",
+  "folderName": "fileName",
+  "videoType": "videoType"
 }

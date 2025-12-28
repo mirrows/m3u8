@@ -17,5 +17,13 @@
   "folder": "文件位置",
   "inTheQueue": "队列中... ...",
   "maxTasks": "最大任务数",
-  "maxProcess": "最大进程数"
+  "maxProcess": "最大进程数",
+  "tools": "工具箱",
+  "combine2mp4": "合并MP4",
+  "sourcePath": "源文件夹",
+  "targetPath": "目标文件夹",
+  "combine": "合并",
+  "completeMsg": "请先完善信息",
+  "folderName": "文件名",
+  "videoType": "视频类型"
 }

@@ -2,8 +2,10 @@
 <script setup lang="ts">
 import { Back } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
+import { useNav } from '@/store/nav';
 
 const router = useRouter()
+const nav = useNav()
 
 const goBack = () => {
   console.log(window.history)
@@ -17,7 +19,7 @@ const goBack = () => {
 </script>
 
 <template>
-  <div class="m_back_wrap" @click="goBack">
+  <div class="m_back_wrap" :style="`left: ${nav.menu ? '300px' : 0}`" @click="goBack">
     <el-icon
       size="30"
       color="#ffd04b"
