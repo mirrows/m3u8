@@ -22,6 +22,8 @@
     await history.load()
     await download.load()
     await config.load()
+
+    console.log(1222222, config.tasks)
   })
 
 </script>

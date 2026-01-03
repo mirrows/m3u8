@@ -27,8 +27,8 @@ export const useConfig = defineStore('config', {
           console.error('获取默认下载目录失败:', err)
         }
         this.downloadFolder = config.downloadFolder || defaultDownloadFolder
-        this.tasks = config.tasks || this.tasks
-        this.process = config.process || this.process
+        this.tasks = config.tasks || this.tasks || 3
+        this.process = config.process || this.process || 10
       }
       invoke<Res<ResStatus>>('set_config', {
         downloadFolder: this.downloadFolder,

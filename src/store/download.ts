@@ -77,7 +77,7 @@ export const useDownload = defineStore('download', {
         }
         if (startItem.links[i].status === 'done') continue
         // console.log(startItem.title, 'map:', downloadList[startItem.title])
-        if (downloadList[startItem.title] && downloadList[startItem.title].length >= config.process) {
+        if (downloadList[startItem.id] && downloadList[startItem.id].length >= config.process) {
           await waiter.wait()
         }
         this.downloadItem(startItem, i, waiter)

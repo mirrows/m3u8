@@ -175,6 +175,19 @@ pub async fn download_item(url: String, path: String) -> Result<Res<ResStatus>, 
     let bytes = response.bytes().await.map_err(|e| e.to_string())?;
     let download_path = Path::new(&download_path);
 
+    let res = Res {
+        code: 0,
+        data: ResStatus {
+            status: "done".to_string(),
+            err_msg: path.to_string(),
+        },
+        msg: path.to_string(),
+    };
+    if download_path.exists() && download_path.is_file() {
+        println!("file exist {}", format!("{}/{}", &download_dir, &path));
+        return Ok(res)
+    }
+
     // 获取父目录路径 d://download/test
     if let Some(parent_dir) = download_path.parent() {
         // 创建目录（如果不存在）
@@ -187,14 +200,6 @@ pub async fn download_item(url: String, path: String) -> Result<Res<ResStatus>, 
         .map_err(|e| e.to_string())?;
     file.write_all(&bytes).await.map_err(|e| e.to_string())?;
 
-    let res = Res {
-        code: 0,
-        data: ResStatus {
-            status: "done".to_string(),
-            err_msg: path.to_string(),
-        },
-        msg: path.to_string(),
-    };
     Ok(res)
 }
 
