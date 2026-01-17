@@ -105,7 +105,6 @@ pub async fn download_video(
     if check_exist {
         let download_dir = GLOBAL_MAP.lock().unwrap().get("folder").unwrap().to_string();
         let output_file_path = format!("{}/video__output/{}.{}", download_dir, &title, &file_type);
-        println!("check_exist: {}, path: {}", check_exist, &output_file_path);
         let download_path = Path::new(&output_file_path);
 
         let res = Res::<Source> {
@@ -127,7 +126,6 @@ pub async fn download_video(
         }
     };
     let links = query_ts_list(&body, &url);
-    println!("length: {}", links.len());
     source.links = links
             .iter()
             .map(|link| Link {
