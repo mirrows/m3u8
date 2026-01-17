@@ -29,6 +29,7 @@ pub async fn fetch_and_process(url: &str, retries: usize) -> Result<String, reqw
       HeaderValue::from_static("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36")
   );
     let client = Client::builder()
+        .timeout(Duration::from_secs(30))
         .default_headers(headers) // 使用HeaderMap设置头
         .build()?; // 使用?传播构建错误
     let mut attempt = 0;

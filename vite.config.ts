@@ -15,6 +15,9 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  esbuild: {
+    target: 'es2023'
+  },
   server: {
     host: '0.0.0.0', // 监听所有地址
     port: 9090, // 指定启动端口

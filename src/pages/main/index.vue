@@ -17,8 +17,11 @@ const router = useRouter()
 const nav = useNav()
 const language = useLanguageStore()
 const textarea = ref('')
+const fileName = ref('')
 const loading = ref(false)
+const dialogVisible = ref(false)
 const curVideo = ref<VideoMsg>({} as VideoMsg)
+const tmpQuality = ref<VideoMsg['quality'][number]>({} as VideoMsg['quality'][number])
 const drawer = computed({
   get() {
     return !!curVideo.value?.url
@@ -68,16 +71,34 @@ const submit = () => {
     ElMessage.error('解析失败：' + err);
   })
 }
-const downloadVideo = (quality: VideoMsg['quality'][number]) => {
+const downloadVideo = (quality: VideoMsg['quality'][number], checkExist = true) => {
   const loading = ElLoading.service({
     lock: true,
     text: '正在解析链接... ...',
     background: 'rgba(255, 255, 255, 0.7)',
   })
-  invoke<Res<Source>>('download_video', { ...curVideo.value, ...quality, title: curVideo.value.name }).then((res) => {
+  invoke<Res<Source>>('download_video', {
+    ...curVideo.value,
+    ...quality,
+    title: curVideo.value.name,
+    checkExist,
+    fileType: 'mp4',
+  }).then((res) => {
     loading.close();
+    if (res.code === 1) {
+      tmpQuality.value = quality
+      fileName.value = curVideo.value.name
+      dialogVisible.value = true
+      return;
+    }
     // ElMessage.success('解析成功，即将开始下载');
+
+    dialogVisible.value = false
     curVideo.value = {} as VideoMsg
+    if (!res.data.links?.length) {
+      ElMessage.error('解析数据为空，请重新请求');
+      return;
+    }
     download.add({
       ...res.data,
       status: 'ready',
@@ -97,7 +118,51 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
     ElMessage.error('解析失败：' + err);
   })
 }
+const copy = (link: string) => {
+   /* 复制内容到文本域 */
+  navigator.clipboard.writeText(link);
+  ElMessage.success(curLanguage.value.linkCopied);
+}
+const reStart = (i: number) => {
+  if (loading.value) return
+  const newHistory = {...historyList.value[i]}
+  loading.value = true;
+  invoke<Res<VideoMsg>>('parse_site', {
+    url: newHistory.url,
+  }).then((res) => {
+    loading.value = false;
+    if (res.code === 0) {
+      Object.assign(newHistory, {
+        ...res.data,
+        timeStr: new Date(res.data.timestamp * 1000).toLocaleString(),
+        quality: res.data.quality.map(item => ({
+          ...item,
+          sizeStr: parseSize(+item.size),
+        })),
+      });
+      dHistory.edit(i, {...newHistory});
+      curVideo.value = newHistory;
 
+    } else {
+      ElMessage.error(res.msg);
+    }
+  }).catch((err: any) => {
+    loading.value = false;
+    ElMessage.error('解析失败：' + err);
+  })
+}
+
+const onCover = () => {
+  downloadVideo(tmpQuality.value, false)
+}
+const onContinue = () => {
+  if (fileName.value === curVideo.value.name) {
+    ElMessage.error(curLanguage.value.continueTips);
+    return
+  }
+  curVideo.value.name = fileName.value
+  downloadVideo(tmpQuality.value)
+}
 </script>
 
 <template>
@@ -125,10 +190,10 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
                 <div class="history_title">{{curLanguage.history}}</div>
               </el-col>
             </el-row>
-            <el-row v-for="history in historyList" class="history_row" @click="curVideo = history">
-              <el-col :span="18" class="flex">
+            <el-row v-for="(history, i) in historyList" class="history_row" @click="curVideo = history">
+              <el-col :span="16" class="flex">
                 <div class="grid-content ep-bg-purple-dark video_title">
-                  <div class="two_line">{{ history.name }}</div>
+                  <div class="two_line" :title="history.name">{{ history.name }}</div>
                   <div class="oneline history_tip">{{ history.url }}</div>
                   <div class="oneline history_tip">{{ history.timeStr }}</div>
                 </div>
@@ -145,6 +210,11 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
                     />
                   </div>
                 </div>
+              </el-col>
+              <el-col :span="2" class="operate_icon_wrap">
+                <el-icon size="24" class="operate_icon" :title="curLanguage.copyLink" @click.stop="copy(history.url)"><Link /></el-icon>
+                <el-icon size="24" :disabled="loading" class="operate_icon" :title="curLanguage.requireAgain" @click.stop="reStart(i)"><Refresh /></el-icon>
+                <!-- <el-icon size="24" class="operate_icon"><Refresh /></el-icon> -->
               </el-col>
             </el-row>
           </div>
@@ -169,6 +239,23 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
               </el-col>
             </el-row>
           </el-drawer>
+        </div>
+        <div>
+          <el-dialog
+            v-model="dialogVisible"
+            :title="curLanguage.fileExist"
+            width="500"
+          >
+            <el-input v-model="fileName" :placeholder="curLanguage.placeholder" />
+            <template #footer>
+              <div class="dialog-footer">
+                <el-button @click="onCover">{{curLanguage.cover}}</el-button>
+                <el-button type="primary" @click="onContinue">
+                  {{curLanguage.continue}}
+                </el-button>
+              </div>
+            </template>
+          </el-dialog>
         </div>
       </el-main>
     </div>
@@ -250,7 +337,27 @@ const downloadVideo = (quality: VideoMsg['quality'][number]) => {
 .drawer_item {
   margin-right: 10px;
 }
-
+.operate_icon_wrap{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 5px;
+  text-align: center;
+}
+.operate_icon_wrap .operate_icon {
+  flex: 1;
+  width: 100%;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.operate_icon_wrap .operate_icon[disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+.operate_icon_wrap .operate_icon:not([disabled="true"]):hover {
+  background-color: #f5f5f5;
+  color: var(--el-color-primary);
+}
 </style>
 
 <style>

@@ -25,5 +25,13 @@
   "combine": "combine",
   "completeMsg": "complete form before you do next step",
   "folderName": "fileName",
-  "videoType": "videoType"
+  "videoType": "videoType",
+  "copy": "copy",
+  "copyLink": "copy link",
+  "requireAgain": "require again",
+  "linkCopied": "link has copied",
+  "fileExist": "file existed",
+  "continue": "continue",
+  "continueTips": "please change the file name and then continue",
+  "cover": "cover"
 }

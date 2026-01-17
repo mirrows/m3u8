@@ -24,7 +24,7 @@ pub struct Res<T> {
     pub data: T,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Source {
     pub id: String,
@@ -39,7 +39,7 @@ pub struct Source {
     pub links: Vec<Link>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Link {
     pub status: String,
     pub url: String,

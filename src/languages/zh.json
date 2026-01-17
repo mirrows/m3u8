@@ -25,5 +25,13 @@
   "combine": "合并",
   "completeMsg": "请先完善信息",
   "folderName": "文件名",
-  "videoType": "视频类型"
+  "videoType": "视频类型",
+  "copy": "复制",
+  "copyLink": "复制链接",
+  "requireAgain": "重新请求",
+  "linkCopied": "链接已复制",
+  "fileExist": "文件已存在",
+  "continue": "继续",
+  "continueTips": "请先修改文件名",
+  "cover": "覆盖"
 }

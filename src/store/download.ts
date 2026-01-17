@@ -59,7 +59,7 @@ export const useDownload = defineStore('download', {
     async startDownload() {
       const config = useConfig()
       if (this.list.filter(item => item.status === 'downloading').length >= config.tasks) return
-      const startItem = this.list.find(item => item.status === 'ready')
+      const startItem = this.list.findLast(item => item.status === 'ready')
       if (!startItem) return
       startItem.status = 'downloading'
       const waiter = new Waiter()
@@ -76,14 +76,13 @@ export const useDownload = defineStore('download', {
           return
         }
         if (startItem.links[i].status === 'done') continue
-        // console.log(startItem.title, 'map:', downloadList[startItem.title])
-        if (downloadList[startItem.id] && downloadList[startItem.id].length >= config.process) {
+        if (startItem.links.filter(e => e.status === 'padding').length > config.process) {
           await waiter.wait()
         }
-        this.downloadItem(startItem, i, waiter)
+        this.downloadItem(startItem, i, waiter, config)
       }
     },
-    downloadItem(video: Source, index: number, waiter: Waiter) {
+    downloadItem(video: Source, index: number, waiter: Waiter, config: ReturnType<typeof useConfig>) {
       video.links[index].status = 'padding'
       downloadList[video.id] = [...(downloadList[video.id] || []), index]
       const path = `${video.title}/${String(index).padStart(5, '0')}${video.links[index].url.split('/').reverse()[0]}`
@@ -97,13 +96,14 @@ export const useDownload = defineStore('download', {
           this.pauseDownload(video)
           return
         }
-        // console.log('download Finished', index)
         video.links[index].status = res.data.status
         const ind = downloadList[video.id].findIndex(ind => ind === index)
         downloadList[video.id].splice(ind, 1)
         await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
-        waiter.emit()
-        if (!video.links.every(link => link.status === 'done')) return
+        if (video.links.filter(e => e.status === 'padding').length < config.process) {
+          waiter.emit()
+        }
+        if (!video.links.every(link => link.status === 'done') || video.status === 'done') return
         video.status = 'done'
         this.startDownload();
         await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
@@ -120,8 +120,7 @@ export const useDownload = defineStore('download', {
           })
           return
         }
-      }).catch(async () => {
-        // console.log('download error', index)
+      }).catch(async (error) => {
         if (video.status === 'paused') {
           this.pauseDownload(video)
           // await new Promise(resolve => this.pauseLine[video.id] = [...(this.pauseLine[video.id] || []), resolve]);
@@ -131,7 +130,7 @@ export const useDownload = defineStore('download', {
         const ind = downloadList[video.id].findIndex(ind => ind === index)
         downloadList[video.id].splice(ind, 1)
         await wait()
-        await this.downloadItem(video, index, waiter)
+        await this.downloadItem(video, index, waiter, config)
         return
       })
     },

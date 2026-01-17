@@ -10,6 +10,8 @@
   ],
   "compilerOptions": {
     "types": ["element-plus/global"],
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "paths": {
       "@/*": ["./src/*"]
     }

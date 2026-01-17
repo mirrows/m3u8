@@ -84,10 +84,41 @@ pub async fn download_video(
     time_str: String,
     timestamp: u64,
     title: String,
+    file_type: String,
+    check_exist: bool,
 ) -> Result<Res<Source>, String> {
     eprintln!("start download url: {}", url);
     thread::sleep(time::Duration::from_secs(2));
+    
+    let mut source = Source {
+        id: Uuid::new_v4().to_string(),
+        title: title.to_string(),
+        name: name.to_string(),
+        poster_url,
+        size,
+        size_str,
+        timestamp,
+        time_str,
+        url: url.to_string(),
+        links: Vec::new(),
+    };
+    if check_exist {
+        let download_dir = GLOBAL_MAP.lock().unwrap().get("folder").unwrap().to_string();
+        let output_file_path = format!("{}/video__output/{}.{}", download_dir, &title, &file_type);
+        println!("check_exist: {}, path: {}", check_exist, &output_file_path);
+        let download_path = Path::new(&output_file_path);
 
+        let res = Res::<Source> {
+            code: 1,
+            msg: format!("file exist {}", download_path.display().to_string()),
+            data: source.clone(),
+        };
+        if download_path.exists() && download_path.is_file() {
+            println!("file exist {}", format!("{}", download_path.display().to_string()));
+            return Ok(res)
+        }
+    }
+    
     let body = match fetch_and_process(&url, 5).await {
         Ok(body) => body, // 这里是从 Result 中提取 String
         Err(e) => {
@@ -96,6 +127,16 @@ pub async fn download_video(
         }
     };
     let links = query_ts_list(&body, &url);
+    println!("length: {}", links.len());
+    source.links = links
+            .iter()
+            .map(|link| Link {
+                status: String::from(""),
+                url: link.to_string(),
+                // bytes: Vec::new(),
+            })
+            .collect();
+
 
     // let links: Vec<&str> = [
     //   "https://www.baidu.com/11.ts",
@@ -104,25 +145,6 @@ pub async fn download_video(
     //   "14.ts",
     //   "/15.ts",
     // ].to_vec();
-    let source = Source {
-        id: Uuid::new_v4().to_string(),
-        title,
-        name,
-        poster_url,
-        size,
-        size_str,
-        timestamp,
-        time_str,
-        url,
-        links: links
-            .iter()
-            .map(|link| Link {
-                status: String::from(""),
-                url: link.to_string(),
-                // bytes: Vec::new(),
-            })
-            .collect(),
-    };
 
     // for (_i, link) in source.links.iter_mut().enumerate() {
     //   link.status = String::from("ready");
@@ -145,7 +167,7 @@ pub async fn download_video(
     println!(
         "url: {}, name: {}",
         source.url.to_string(),
-        source.name.to_string()
+        source.title.to_string()
     );
 
     let res = Res::<Source> {
@@ -163,16 +185,6 @@ pub async fn download_item(url: String, path: String) -> Result<Res<ResStatus>, 
     // thread::sleep(time::Duration::from_secs(2));
     let download_dir = GLOBAL_MAP.lock().unwrap().get("folder").unwrap().to_string();
     let download_path = format!("{}/{}", download_dir, path);
-    let client = reqwest::Client::builder()
-        .timeout(Duration::from_secs(30)) // 设置请求超时时间
-        .build()
-        .map_err(|e| e.to_string())?;
-    let response = client
-        .get(url.to_string())
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-    let bytes = response.bytes().await.map_err(|e| e.to_string())?;
     let download_path = Path::new(&download_path);
 
     let res = Res {
@@ -187,6 +199,17 @@ pub async fn download_item(url: String, path: String) -> Result<Res<ResStatus>, 
         println!("file exist {}", format!("{}/{}", &download_dir, &path));
         return Ok(res)
     }
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(30)) // 设置请求超时时间
+        .build()
+        .map_err(|e| e.to_string())?;
+    let response = client
+        .get(url.to_string())
+        .send()
+        .await
+        .map_err(|e| e.to_string())?;
+    let bytes = response.bytes().await.map_err(|e| e.to_string())?;
+    
 
     // 获取父目录路径 d://download/test
     if let Some(parent_dir) = download_path.parent() {

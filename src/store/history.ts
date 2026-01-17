@@ -14,9 +14,16 @@ export const useDownloadHistory = defineStore('history', {
     },
     async add(history: VideoMsg) {
       console.log('add history:', history);
-      await db.history.put({ ...history, lastLogin: Date.now() })
-      this.list = this.list.filter(item => item.url !== history.url)
-      this.list.unshift(history)
+      const newHistory = { ...history, lastLogin: Date.now() }
+      await db.history.put(newHistory)
+      this.list = this.list.filter(item => item.url !== newHistory.url)
+      this.list.unshift(newHistory)
+    },
+    async edit(i:number, history: VideoMsg) {
+      console.log('edit history:', history);
+      const newHistory = { ...history, lastLogin: Date.now() }
+      await db.history.put(newHistory)
+      this.list = this.list.map((item, index) => i === index ? newHistory : item )
     },
     async remove(history: VideoMsg) {
       await db.history.delete(history.url)
