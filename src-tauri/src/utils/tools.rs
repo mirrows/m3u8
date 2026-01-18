@@ -7,6 +7,7 @@ use tokio::fs;
 use tokio::time::{sleep, Duration};
 use std::{thread, time};
 use std::process::Command;
+use std::os::windows::process::CommandExt;
 
 pub fn replace_url(url: String, filenames: Vec<String>) -> Vec<String> {
     let parts = url.split("/").collect::<Vec<&str>>();
@@ -172,6 +173,7 @@ pub async fn ffmpeg_combine(source_path: &str, target_path: &str, init_path: &st
                 "-y",
                 &target_path,
             ])
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW 标志
             .status()
             .expect("failed to execute ffmpeg");
 
