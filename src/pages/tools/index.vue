@@ -9,15 +9,13 @@ const router = useRouter()
 const language = useLanguageStore()
 
 const goCombine = () => {
-  console.log(565)
+  router.push({
+    name: 'combine',
+  });
 }
 
 const tools = computed(() => [
-  { icon: 'combine', name: language.cur.combine2mp4, fn: () => {
-    router.push({
-      name: 'combine',
-    });
-  } }
+  { icon: 'combine', name: language.cur.combine2mp4, fn: goCombine }
 ])
 
 onMounted(async () => {
@@ -30,12 +28,12 @@ onMounted(async () => {
 <template>
   <div class="tools_wrap">
     <div class="tools_list">
-      <div v-for="(item, i) in tools" :key="i" :title="item.name" class="list_item">
-        <el-icon class="list_icon" @click="item.fn"><CustomIcon :icon="item.icon" /></el-icon>
+      <div v-for="(item, i) in tools" :key="i" :title="item.name" class="list_item" @click="item.fn">
+        <el-icon class="list_icon"><CustomIcon :icon="item.icon" /></el-icon>
         <div class="item_name">{{item.name}}</div>
       </div>
     </div>
-    <Back  />
+    <Back to="/" />
   </div>
 </template>
 

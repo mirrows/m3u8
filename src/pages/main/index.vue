@@ -16,10 +16,14 @@ const { invoke } = core
 const router = useRouter()
 const nav = useNav()
 const language = useLanguageStore()
+const curLanguage = computed(() => {
+  return language.cur
+})
 const textarea = ref('')
 const fileName = ref('')
 const loading = ref(false)
 const dialogVisible = ref(false)
+const loadTimes = ref(0)
 const curVideo = ref<VideoMsg>({} as VideoMsg)
 const tmpQuality = ref<VideoMsg['quality'][number]>({} as VideoMsg['quality'][number])
 const drawer = computed({
@@ -37,9 +41,15 @@ const download = useDownload()
 const historyList = computed(() => {
   return dHistory.list
 })
-const curLanguage = computed(() => {
-  return language.cur
+const showedList = computed(() => {
+  return historyList.value.slice(0, loadTimes.value * 10)
 })
+
+const loadList = () => {
+  if (showedList.value.length === historyList.value.length) return
+  console.log(4564)
+  loadTimes.value += 1
+}
 
 const submit = () => {
   if (!textarea.value) {
@@ -167,7 +177,7 @@ const onContinue = () => {
 
 <template>
   <div class="main_wrap">
-    <div class="fixed_height m_custom_scroller">
+    <div class="fixed_height m_custom_scroller" v-infinite-scroll="loadList">
       <el-image
         class="header_img"
         loading="lazy"
@@ -190,7 +200,7 @@ const onContinue = () => {
                 <div class="history_title">{{curLanguage.history}}</div>
               </el-col>
             </el-row>
-            <el-row v-for="(history, i) in historyList" class="history_row" @click="curVideo = history">
+            <el-row v-for="(history, i) in showedList" class="history_row" @click="curVideo = history">
               <el-col :span="16" class="flex">
                 <div class="grid-content ep-bg-purple-dark video_title">
                   <div class="two_line" :title="history.name">{{ history.name }}</div>
@@ -279,6 +289,8 @@ const onContinue = () => {
   margin: auto;
 }
 .history_wrap{
+  position: sticky;
+  top: 0;
   margin-top: 20px;
 }
 .history_title{

@@ -76,7 +76,7 @@ onMounted(async () => {
       </div>
     </div>
     <!-- <div class="setting_empty">{{ language.cur.noSettingItem }}</div> -->
-    <Back />
+    <Back to="/" />
   </div>
 </template>
 

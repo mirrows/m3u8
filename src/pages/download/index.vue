@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Back from '@/components/back/index.vue'
 import { useDownload } from '@/store/download'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useLanguageStore } from '@/store/language'
 import { CloseBold } from '@element-plus/icons-vue'
 import CustomIcon from '@/components/custom-icon/index.vue'
@@ -11,9 +11,19 @@ import type { Source } from '@/types/common'
 
 const download = useDownload();
 const language = useLanguageStore();
+const loadTimes = ref(0)
 const downloadList = computed<Source[]>(() => {
   return download.list || []
 })
+const showedList = computed(() => {
+  return downloadList.value.slice(0, loadTimes.value * 10)
+})
+
+const loadList = () => {
+  if (showedList.value.length === downloadList.value.length) return
+  loadTimes.value += 1
+}
+
 
 onMounted(() => {
   console.log('downloadList', downloadList.value)
@@ -30,9 +40,9 @@ const deleteVideo = (item: Source) => {
 </script>
 
 <template>
-  <div class="download_list_wrap">
+  <div class="download_list_wrap m_custom_scroller" v-infinite-scroll="loadList">
     <div
-      v-for="item in downloadList"
+      v-for="item in showedList"
       :key="item.id"
       class="download_list_item"
     >
@@ -66,7 +76,7 @@ const deleteVideo = (item: Source) => {
     </div>
     <div v-if="downloadList.length === 0" class="setting_empty">{{ language.cur.noDownloadItem }}</div>
   </div>
-  <Back  />
+  <Back to="/" />
 </template>
 
 <style scoped>

@@ -76,7 +76,7 @@ export const useDownload = defineStore('download', {
           return
         }
         if (startItem.links[i].status === 'done') continue
-        if (startItem.links.filter(e => e.status === 'padding').length > config.process) {
+        if (startItem.links.filter(e => e.status === 'padding' || e.status === 'error').length >= config.process) {
           await waiter.wait()
         }
         this.downloadItem(startItem, i, waiter, config)
@@ -86,6 +86,12 @@ export const useDownload = defineStore('download', {
       video.links[index].status = 'padding'
       downloadList[video.id] = [...(downloadList[video.id] || []), index]
       const path = `${video.title}/${String(index).padStart(5, '0')}${video.links[index].url.split('/').reverse()[0]}`
+      // console.log(
+      //   '正在下载的进程数：',
+      //   video.links.filter(e => e.status === 'padding').length,
+      //   '包含错误的进程数',
+      //   video.links.filter(e => e.status === 'padding' || e.status === 'error').length,
+      // )
       return invoke<Res<ResStatus>>('download_item', {
         url: video.links[index].url,
         path,
@@ -100,7 +106,7 @@ export const useDownload = defineStore('download', {
         const ind = downloadList[video.id].findIndex(ind => ind === index)
         downloadList[video.id].splice(ind, 1)
         await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
-        if (video.links.filter(e => e.status === 'padding').length < config.process) {
+        if (video.links.filter(e => e.status === 'padding' || e.status === 'error').length < config.process) {
           waiter.emit()
         }
         if (!video.links.every(link => link.status === 'done') || video.status === 'done') return
@@ -121,6 +127,7 @@ export const useDownload = defineStore('download', {
           return
         }
       }).catch(async (error) => {
+        // console.log('error:', error)
         if (video.status === 'paused') {
           this.pauseDownload(video)
           // await new Promise(resolve => this.pauseLine[video.id] = [...(this.pauseLine[video.id] || []), resolve]);
@@ -141,19 +148,20 @@ export const useDownload = defineStore('download', {
 })
 
 class Waiter {
-  res: Function | null
+  res: Function[]
   constructor() {
-    this.res = null;
+    this.res = [];
   }
   async wait() {
     return new Promise((res) => {
-      this.res = res
+      this.res.push(res)
     })
   }
 
   async emit() {
     if (!this.res) return
-    await this.res()
-    this.res = null
+    const fn = this.res.shift()
+    if(!fn) return
+    await fn()
   }
 }

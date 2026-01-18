@@ -6,9 +6,13 @@ import { useNav } from '@/store/nav';
 
 const router = useRouter()
 const nav = useNav()
+const props = defineProps(['to']);
 
 const goBack = () => {
-  console.log(window.history)
+  if (props.to) {
+    router.replace(props.to)
+    return;
+  }
   if (window.history.length > 1) {
     router.back();
   } else {
