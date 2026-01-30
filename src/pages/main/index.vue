@@ -41,6 +41,9 @@ const download = useDownload()
 const historyList = computed(() => {
   return dHistory.list
 })
+const posters = computed(() => {
+  return historyList.value.map(item => item.posterUrl)
+})
 const showedList = computed(() => {
   return historyList.value.slice(0, loadTimes.value * 10)
 })
@@ -90,6 +93,7 @@ const downloadVideo = (quality: VideoMsg['quality'][number], checkExist = true) 
   invoke<Res<Source>>('download_video', {
     ...curVideo.value,
     ...quality,
+    site_url: curVideo.value.url,
     title: curVideo.value.name,
     checkExist,
     fileType: 'mp4',
@@ -212,7 +216,8 @@ const onContinue = () => {
                 <div class="poster_width_wrap">
                   <div class="poster_wrap" @click.stop>
                     <el-image
-                      :preview-src-list="[history.posterUrl]"
+                      :preview-src-list="posters"
+                      :initial-index="i"
                       class="poster"
                       loading="lazy"
                       :src="history.posterUrl"

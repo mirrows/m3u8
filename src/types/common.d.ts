@@ -20,6 +20,7 @@ export type Res<T> = {
   data: T,
 }
 
+
 export type Source = {
   id: string,
   title: string,
@@ -31,15 +32,28 @@ export type Source = {
   timeStr: string,
   status: string,
   url: string,
+  siteUrl: string,
   links: Link[],
   lastLogin: number,
 }
 
+export enum SOURCE_STATUS {
+  READY = 'ready',
+  DOWNLOADING = 'downloading',
+  DONE = 'done',
+  ERROR = 'error',
+}
 
 export type Link = {
   status: string,
   url: string,
   // bytes: any[],
+}
+
+export enum LINK_STATUS {
+  PADDING = 'padding',
+  DONE = 'done',
+  ERROR = 'error',
 }
 
 export type ResStatus = {

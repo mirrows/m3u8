@@ -188,7 +188,7 @@ pub async fn ffmpeg_combine(source_path: &str, target_path: &str, init_path: &st
             eprintln!("FFmpeg 合并失败, {} 即将重试...", target_path);
             times += 1;
             if times >= 5 {
-                res.status = "done".to_string();
+                res.status = "error".to_string();
                 res.err_msg = format!("FFmpeg 合并失败, {} 重试 5 次后仍失败", target_path);
                 break;
             }

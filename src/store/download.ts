@@ -1,16 +1,62 @@
 
 import { defineStore } from 'pinia'
-import type { Res, ResStatus, Source } from '@/types/common'
+import type { Res, ResStatus, Source, VideoMsg } from '@/types/common'
 import { core } from '@tauri-apps/api'
 import { wait } from '@/utils/tool'
 import { db } from '@/db'
-import { ElMessageBox } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { useConfig } from './config'
 import { pause } from '@/components/custom-icon/svg-list'
 
 const { invoke } = core
 
 const downloadList: Record<string, number[]> = {}
+
+const retryCombine = (video: Source) => {
+  ElMessageBox.confirm(video.title, '合并失败', {
+    confirmButtonText: 'OK',
+    cancelButtonText: 'Cancel',
+    type: 'warning',
+  }).then(() => {
+    invoke<Res<ResStatus>>('combine_splits', {
+      name: video.title,
+      fileType: video.links[0].url.split('.').reverse()[0],
+    }).then((res) => {
+      if (res.code !== 0 || res.data.status !== 'done') {
+        retryCombine(video)
+      }
+    });
+  })
+}
+
+const retryDownload = async (startItem: Source) => {
+  const res = await invoke<Res<VideoMsg>>('parse_site', {
+    url: startItem.siteUrl,
+  })
+  if (res.code !== 0 || !res.data) {
+    ElMessage.error(`${startItem.title}解析失败`)
+    return
+  }
+  const quality = res.data.quality.find(item => item.name === startItem.name)
+  if(!quality) {
+    ElMessage.error(`${startItem.title}解析失败，未找到${startItem.title}-${startItem.name}P资源`)
+    return
+  }
+  const source = await invoke<Res<Source>>('download_video', {
+    ...quality,
+    title: startItem.title,
+    checkExist: false,
+    fileType: 'mp4',
+  })
+  if (!source.data.links?.length) {
+    ElMessage.error('解析数据为空，请重新请求');
+    return;
+  }
+  return {
+    ...source.data,
+    status: 'ready',
+  }
+}
 
 
 export const useDownload = defineStore('download', {
@@ -21,7 +67,51 @@ export const useDownload = defineStore('download', {
   }),
   actions: {
     async load() {
-      this.list = await db.downloadList.orderBy('lastLogin').reverse().toArray()
+      const list = await db.downloadList.orderBy('lastLogin').reverse().toArray()
+      // list.push({
+      //   id: '1234',
+      //   title: 'test video in youtube',
+      //   name: '1080*1920',
+      //   posterUrl: 'https://img.shetu66.com/2023/06/26/1687770031227597.png',
+      //   size: 'string',
+      //   sizeStr: 'string',
+      //   timestamp: Date.now(),
+      //   timeStr: new Date().toLocaleString(),
+      //   status: 'done',
+      //   url: 'string',
+      //   siteUrl: 'http://baidu.com',
+      //   links: [
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'error', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'error', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'padding', url: 'string' },
+      //     { status: 'padding', url: 'string' },
+      //     { status: 'padding', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //   ],
+      //   lastLogin: Date.now(),
+      // })
+      this.list = list.map(item => ({
+        ...item,
+        status: item.status === 'done' ? 'done' : 'paused',
+      }))
     },
     async add(download: Source) {
       const res = { ...download, lastLogin: Date.now() }
@@ -62,6 +152,11 @@ export const useDownload = defineStore('download', {
       const startItem = this.list.findLast(item => item.status === 'ready')
       if (!startItem) return
       startItem.status = 'downloading'
+      if(!startItem.links.every(link => link.url)) {
+        const newItem = await retryDownload(startItem)
+        if (!newItem) return
+        startItem.links = newItem.links
+      }
       const waiter = new Waiter()
       await db.downloadList.put({ ...startItem, links: startItem.links.map(link => ({ ...link, url: '' })) })
       for (let i = 0; i < startItem.links.length; i++) {
@@ -115,15 +210,13 @@ export const useDownload = defineStore('download', {
         await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
         const combineRes = await invoke<Res<ResStatus>>('combine_splits', {
           name: video.title,
-          fileType: video.links[index].url.split('.').reverse()[0],
+          fileType: video.links[0].url.split('.').reverse()[0],
         });
-        if (combineRes.code !== 0) {
-          video.status = 'ready'
-          video.links.forEach(link => link.status = '')
-          await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
-          ElMessageBox.alert(video.title, '合并失败', {
-            confirmButtonText: 'OK',
-          })
+        if (combineRes.code !== 0 || combineRes.data.status !== 'done') {
+          // video.status = 'done'
+          // video.links.forEach(link => link.status = '')
+          // await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
+          retryCombine(video)
           return
         }
       }).catch(async (error) => {

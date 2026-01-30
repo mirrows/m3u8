@@ -76,14 +76,15 @@ pub async fn parse_site(url: String) -> Result<Res<VideoMsg>, String> {
 
 #[tauri::command]
 pub async fn download_video(
-    url: String,
+    title: String,
     name: String,
     poster_url: String,
     size: String,
     size_str: String,
-    time_str: String,
     timestamp: u64,
-    title: String,
+    time_str: String,
+    url: String,
+    site_url: String,
     file_type: String,
     check_exist: bool,
 ) -> Result<Res<Source>, String> {
@@ -99,6 +100,7 @@ pub async fn download_video(
         size_str,
         timestamp,
         time_str,
+        site_url,
         url: url.to_string(),
         links: Vec::new(),
     };

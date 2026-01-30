@@ -36,6 +36,7 @@ pub struct Source {
     pub timestamp: u64,
     pub time_str: String,
     pub url: String,
+    pub site_url: String,
     pub links: Vec<Link>,
 }
 

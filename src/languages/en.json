@@ -33,5 +33,10 @@
   "fileExist": "file existed",
   "continue": "continue",
   "continueTips": "please change the file name and then continue",
-  "cover": "cover"
+  "cover": "cover",
+  "waitingForSource": "waiting for source request",
+  "statusReady": "ready",
+  "statusPadding": "padding",
+  "statusDone": "done",
+  "statusError": "error"
 }

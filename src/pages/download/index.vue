@@ -8,7 +8,9 @@ import CustomIcon from '@/components/custom-icon/index.vue'
 import { ElMessageBox } from 'element-plus'
 import { confirmD } from '@/utils/tool'
 import type { Source } from '@/types/common'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const download = useDownload();
 const language = useLanguageStore();
 const loadTimes = ref(0)
@@ -37,6 +39,15 @@ const deleteVideo = (item: Source) => {
   })
 }
 
+const goDetail = (item: Source) => {
+  router.push({
+    path: '/download/detail',
+    query: {
+      id: item.id
+    }
+  })
+}
+
 </script>
 
 <template>
@@ -46,17 +57,18 @@ const deleteVideo = (item: Source) => {
       :key="item.id"
       class="download_list_item"
     >
-      <img :src="item.posterUrl" alt="poster" class="download_list_item_poster">
-      <div class="download_list_item_msg">
+      <img :src="item.posterUrl" :preview-src-list="[item.posterUrl]" alt="poster" class="download_list_item_poster">
+      <div class="download_list_item_msg" @click.stop="goDetail(item)">
         <div class="download_list_item_firstline">
           <div class="download_list_item_title">{{ item.title }}</div>
           <div v-if="item.status !== 'done'" class="download_list_item_operate">
-            <template v-if="item.status !== 'ready'">
-              <el-icon v-if="item.status === 'paused'" class="operate_icon" @click="download.resume(item)"><CustomIcon icon="play" /></el-icon>
-              <el-icon v-else class="operate_icon" @click="download.pause(item)"><CustomIcon icon="pause" /></el-icon>
+            <div v-if="item.status === 'downloading' && !item.links.every(link => link.url)" class="inqueue_tips">{{ language.cur.waitingForSource }}</div>
+            <template v-else-if="item.status !== 'ready'">
+              <el-icon v-if="item.status === 'paused'" class="operate_icon" @click.stop="download.resume(item)"><CustomIcon icon="play" /></el-icon>
+              <el-icon v-else class="operate_icon" @click.stop="download.pause(item)"><CustomIcon icon="pause" /></el-icon>
             </template>
             <div v-else class="inqueue_tips">{{ language.cur.inTheQueue }}</div>
-            <el-icon class="operate_icon" @click="deleteVideo(item)"><CloseBold /></el-icon>
+            <el-icon class="operate_icon" @click.stop="deleteVideo(item)"><CloseBold /></el-icon>
           </div>
         </div>
         <el-progress
