@@ -6,7 +6,6 @@ import { wait } from '@/utils/tool'
 import { db } from '@/db'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useConfig } from './config'
-import { pause } from '@/components/custom-icon/svg-list'
 
 const { invoke } = core
 
@@ -68,46 +67,46 @@ export const useDownload = defineStore('download', {
   actions: {
     async load() {
       const list = await db.downloadList.orderBy('lastLogin').reverse().toArray()
-      // list.push({
-      //   id: '1234',
-      //   title: 'test video in youtube',
-      //   name: '1080*1920',
-      //   posterUrl: 'https://img.shetu66.com/2023/06/26/1687770031227597.png',
-      //   size: 'string',
-      //   sizeStr: 'string',
-      //   timestamp: Date.now(),
-      //   timeStr: new Date().toLocaleString(),
-      //   status: 'done',
-      //   url: 'string',
-      //   siteUrl: 'http://baidu.com',
-      //   links: [
-      //     { status: 'done', url: 'string' },
-      //     { status: 'done', url: 'string' },
-      //     { status: 'done', url: 'string' },
-      //     { status: 'done', url: 'string' },
-      //     { status: 'error', url: 'string' },
-      //     { status: 'done', url: 'string' },
-      //     { status: 'error', url: 'string' },
-      //     { status: 'done', url: 'string' },
-      //     { status: 'done', url: 'string' },
-      //     { status: 'padding', url: 'string' },
-      //     { status: 'padding', url: 'string' },
-      //     { status: 'padding', url: 'string' },
-      //     { status: 'done', url: 'string' },
-      //     { status: 'done', url: 'string' },
-      //     { status: '', url: 'string' },
-      //     { status: '', url: 'string' },
-      //     { status: '', url: 'string' },
-      //     { status: '', url: 'string' },
-      //     { status: '', url: 'string' },
-      //     { status: '', url: 'string' },
-      //     { status: '', url: 'string' },
-      //     { status: '', url: 'string' },
-      //     { status: '', url: 'string' },
-      //     { status: '', url: 'string' },
-      //   ],
-      //   lastLogin: Date.now(),
-      // })
+      list.push({
+        id: '1234',
+        title: 'test video in youtube',
+        name: '1080*1920',
+        posterUrl: 'https://img.shetu66.com/2023/06/26/1687770031227597.png',
+        size: 'string',
+        sizeStr: 'string',
+        timestamp: Date.now(),
+        timeStr: new Date().toLocaleString(),
+        status: 'done',
+        url: 'string',
+        siteUrl: 'http://baidu.com',
+        links: [
+          { status: 'done', url: 'string' },
+          { status: 'done', url: 'string' },
+          { status: 'done', url: 'string' },
+          { status: 'done', url: 'string' },
+          { status: 'error', url: 'string' },
+          { status: 'done', url: 'string' },
+          { status: 'error', url: 'string' },
+          { status: 'done', url: 'string' },
+          { status: 'done', url: 'string' },
+          { status: 'padding', url: 'string' },
+          { status: 'padding', url: 'string' },
+          { status: 'padding', url: 'string' },
+          { status: 'done', url: 'string' },
+          { status: 'done', url: 'string' },
+          { status: '', url: 'string' },
+          { status: '', url: 'string' },
+          { status: '', url: 'string' },
+          { status: '', url: 'string' },
+          { status: '', url: 'string' },
+          { status: '', url: 'string' },
+          { status: '', url: 'string' },
+          { status: '', url: 'string' },
+          { status: '', url: 'string' },
+          { status: '', url: 'string' },
+        ],
+        lastLogin: Date.now(),
+      })
       this.list = list.map(item => ({
         ...item,
         status: item.status === 'done' ? 'done' : 'paused',

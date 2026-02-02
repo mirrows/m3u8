@@ -65,6 +65,7 @@ img,.el-image {
 
 body::-webkit-scrollbar, .m_custom_scroller::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 body::-webkit-scrollbar-track, .m_custom_scroller::-webkit-scrollbar-track {
   background-color: #f5f5f5;
