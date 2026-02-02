@@ -93,7 +93,7 @@ const downloadVideo = (quality: VideoMsg['quality'][number], checkExist = true) 
   invoke<Res<Source>>('download_video', {
     ...curVideo.value,
     ...quality,
-    site_url: curVideo.value.url,
+    siteUrl: curVideo.value.url,
     title: curVideo.value.name,
     checkExist,
     fileType: 'mp4',

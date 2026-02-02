@@ -57,7 +57,7 @@ const goDetail = (item: Source) => {
       :key="item.id"
       class="download_list_item"
     >
-      <img :src="item.posterUrl" :preview-src-list="[item.posterUrl]" alt="poster" class="download_list_item_poster">
+      <el-image :src="item.posterUrl" :preview-src-list="[item.posterUrl]" alt="poster" class="download_list_item_poster" />
       <div class="download_list_item_msg" @click.stop="goDetail(item)">
         <div class="download_list_item_firstline">
           <div class="download_list_item_title">{{ item.title }}</div>
