@@ -3,7 +3,7 @@ import { useLanguageStore } from '@/store/language';
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus';
 import { computed, onUnmounted, reactive, ref } from 'vue';
 import { core } from '@tauri-apps/api'
-import { parseSize } from '@/utils/tool';
+import { copy, parseSize } from '@/utils/tool';
 import { useRouter } from 'vue-router'
 import { useDownloadHistory } from '@/store/history';
 import { useDownload } from '@/store/download';
@@ -131,11 +131,6 @@ const downloadVideo = (quality: VideoMsg['quality'][number], checkExist = true) 
     loading.close();
     ElMessage.error('解析失败：' + err);
   })
-}
-const copy = (link: string) => {
-   /* 复制内容到文本域 */
-  navigator.clipboard.writeText(link);
-  ElMessage.success(curLanguage.value.linkCopied);
 }
 const reStart = (i: number) => {
   if (loading.value) return

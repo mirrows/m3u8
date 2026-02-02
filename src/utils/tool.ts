@@ -1,5 +1,5 @@
 import { useLanguageStore } from "@/store/language"
-import { ElMessageBox } from "element-plus"
+import { ElMessage, ElMessageBox } from "element-plus"
 import { platform } from '@tauri-apps/plugin-os';
 import { open } from '@tauri-apps/plugin-dialog';
 import { downloadDir } from "@tauri-apps/api/path"
@@ -41,6 +41,14 @@ export const wait = (ms = 2000) => {
       resolve(true)
     }, ms)
   })
+}
+
+export const copy = (link: string) => {
+  /* 复制内容到文本域 */
+  const language = useLanguageStore()
+  const curLanguage = language.cur
+ navigator.clipboard.writeText(link);
+ ElMessage.success(curLanguage.copied);
 }
 
 export async function selectFolder() {

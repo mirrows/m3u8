@@ -1,25 +1,26 @@
 <script setup lang="ts">
 import Back from '@/components/back/index.vue'
+import CustomIcon from '@/components/custom-icon/index.vue'
 import { useDownload } from '@/store/download'
 import { useRoute } from 'vue-router'
 import { computed, onMounted, ref } from 'vue'
 import type { Source } from '@/types/common'
 import { useLanguageStore } from '@/store/language'
-import { LINK_STATUS, PROGRESS_MAP, TO_SOURCE_STATUS } from '@/types/enum'
+import { LINK_STATUS, PROGRESS_MAP, SOURCE_STATUS, TO_SOURCE_STATUS } from '@/types/enum'
+import { copy } from '@/utils/tool'
 
 
 const language = useLanguageStore();
 const download = useDownload()
 const routes =  useRoute()
-console.log(56, routes.query)
 const downloadInfo = computed<Source>(() => download.list.find((item) => item.id === routes.query.id) || {} as Source)
 
 const doneLength = computed(() => {
-  return downloadInfo.value.links.filter(link => link.status === LINK_STATUS.DONE).length
+  return (downloadInfo.value.links || []).filter(link => link.status === LINK_STATUS.DONE).length
 })
 
 const percentage = computed(() => {
-  return Math.min(doneLength.value/downloadInfo.value.links.length * 100, 100)
+  return Math.min(doneLength.value/(downloadInfo.value.links || []).length * 100, 100)
 })
 
 
@@ -42,18 +43,30 @@ const percentage = computed(() => {
             </div>
             <div class="download_info_title">
               <span class="download_info_title_status" :class="`status_${downloadInfo.status}`"></span>
-              <span>{{ downloadInfo.title }}</span>
+              <span style="cursor: pointer;" @click.stop="copy(downloadInfo.title)">{{ downloadInfo.title }}</span>
             </div>
           </div>
           <div v-if="downloadInfo.siteUrl" class="download_info_site">
-            <el-icon><CopyDocument /></el-icon>
-            {{ downloadInfo.siteUrl }}
-            </div>
+            <el-icon @click.stop="copy(downloadInfo.siteUrl)"><CopyDocument /></el-icon>
+            <span @click.stop="copy(downloadInfo.siteUrl)">{{ downloadInfo.siteUrl }}</span>
+          </div>
         </div>
-        <div>
+        <div v-if="downloadInfo.status !== 'done'" class="operate_wrap">
+          <template v-if="downloadInfo.status !== 'ready'">
+            <el-icon v-if="downloadInfo.status === 'paused'" class="operate_icon" @click.stop="download.resume(downloadInfo)"><CustomIcon icon="play" class="op_ic" /></el-icon>
+            <el-icon v-else class="operate_icon" @click.stop="download.pause(downloadInfo)"><CustomIcon icon="pause" class="op_ic" /></el-icon>
+          </template>
         </div>
       </div>
-      <template #footer>{{downloadInfo.timeStr}}</template>
+      <template #footer>
+        <div class="flex">
+          <div style="flex: 1">{{downloadInfo.timeStr}}</div>
+          <div>
+            <div v-if="downloadInfo.status === 'downloading' && !downloadInfo.links.every(link => link.url)" class="inqueue_tips">{{ language.cur.waitingForSource }}</div>
+            <div v-else-if="downloadInfo.status === 'ready'" class="inqueue_tips">{{ language.cur.inTheQueue }}</div>
+          </div>
+        </div>
+      </template>
     </el-card>
     <el-card class="status_area_card">
       <div class="status_area_wrap">
@@ -77,16 +90,18 @@ const percentage = computed(() => {
             </div>
           </div>
           <div class="progress_wrap">
-            <span style="margin-right: 10px;">{{ doneLength }}/{{ downloadInfo.links.length }}</span>
+            <span style="margin-right: 10px;">{{ doneLength }}/{{ (downloadInfo.links || []).length }}</span>
             <el-progress
               type="circle"
-              width="32"
+              :width="32"
               :status="PROGRESS_MAP[TO_SOURCE_STATUS[downloadInfo.status as keyof typeof TO_SOURCE_STATUS]]"
+              :color="PROGRESS_MAP[TO_SOURCE_STATUS[downloadInfo.status as keyof typeof TO_SOURCE_STATUS]] ? '' : '#e4e4e4'"
               :percentage="percentage"
             >
-              <!-- <template #default="{ percentage }">
-                <div style="width: 32px;font-size: 10px;">{{ percentage.toFixed(0) }}</div>
-              </template> -->
+              <template #default="{ percentage }">
+                <div v-if="downloadInfo.status !== SOURCE_STATUS.DONE">{{ percentage.toFixed(0) }}</div>
+                <el-icon v-else><Select /></el-icon>
+              </template>
             </el-progress>
           </div>
         </div>
@@ -115,7 +130,29 @@ const percentage = computed(() => {
 .download_info_card{
   margin-bottom: 10px;
 }
+.download_info_content{
+  display:flex;
+}
+.operate_wrap{
+  margin: 10px;
+}
+.operate_icon{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 24px;
+  height: 24px;
+  background-color: var(--el-color-primary);
+  border-radius: 4px;
+  /* box-shadow: inset 0 0 5px 2px #f5f5f5; */
+  font-size: 14px;
+  cursor: pointer;
+}
+.operate_icon .op_ic{
+  color: #fff;
+}
 .download_info_left{
+  flex: 1;
   padding: 10px;
 }
 .status_done_wrap{
@@ -198,8 +235,11 @@ const percentage = computed(() => {
   margin-top: 10px;
   font-size: 13px;
   color: #999;
+}
+.download_info_site * {
   cursor: pointer;
 }
+.operate_wrap{}
 .status_area_card{
   flex: 1;
 }
@@ -250,6 +290,7 @@ const percentage = computed(() => {
   /* justify-content: center; */
   /* align-items: center; */
   height: 0;
+  min-height: 200px;
   padding: 0 10px 10px;
   overflow-y: auto;
 }
@@ -267,7 +308,7 @@ const percentage = computed(() => {
 .status_ready,
 .status_paused{
   background-color: currentColor;
-  color: #f5f5f5;
+  color: #ddd;
 }
 .status_padding,
 .status_downloading{

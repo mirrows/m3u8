@@ -67,46 +67,46 @@ export const useDownload = defineStore('download', {
   actions: {
     async load() {
       const list = await db.downloadList.orderBy('lastLogin').reverse().toArray()
-      list.push({
-        id: '1234',
-        title: 'test video in youtube',
-        name: '1080*1920',
-        posterUrl: 'https://img.shetu66.com/2023/06/26/1687770031227597.png',
-        size: 'string',
-        sizeStr: 'string',
-        timestamp: Date.now(),
-        timeStr: new Date().toLocaleString(),
-        status: 'done',
-        url: 'string',
-        siteUrl: 'http://baidu.com',
-        links: [
-          { status: 'done', url: 'string' },
-          { status: 'done', url: 'string' },
-          { status: 'done', url: 'string' },
-          { status: 'done', url: 'string' },
-          { status: 'error', url: 'string' },
-          { status: 'done', url: 'string' },
-          { status: 'error', url: 'string' },
-          { status: 'done', url: 'string' },
-          { status: 'done', url: 'string' },
-          { status: 'padding', url: 'string' },
-          { status: 'padding', url: 'string' },
-          { status: 'padding', url: 'string' },
-          { status: 'done', url: 'string' },
-          { status: 'done', url: 'string' },
-          { status: '', url: 'string' },
-          { status: '', url: 'string' },
-          { status: '', url: 'string' },
-          { status: '', url: 'string' },
-          { status: '', url: 'string' },
-          { status: '', url: 'string' },
-          { status: '', url: 'string' },
-          { status: '', url: 'string' },
-          { status: '', url: 'string' },
-          { status: '', url: 'string' },
-        ],
-        lastLogin: Date.now(),
-      })
+      // list.push({
+      //   id: '1234',
+      //   title: 'test video in youtubetest video in youtubetest',
+      //   name: '1080*1920',
+      //   posterUrl: 'https://img.shetu66.com/2023/06/26/1687770031227597.png',
+      //   size: 'string',
+      //   sizeStr: 'string',
+      //   timestamp: Date.now(),
+      //   timeStr: new Date().toLocaleString(),
+      //   status: 'ready',
+      //   url: 'string',
+      //   siteUrl: 'http://baidu.com',
+      //   links: [
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'error', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'error', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'padding', url: 'string' },
+      //     { status: 'padding', url: 'string' },
+      //     { status: 'padding', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: 'done', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //     { status: '', url: 'string' },
+      //   ],
+      //   lastLogin: Date.now(),
+      // }),
       this.list = list.map(item => ({
         ...item,
         status: item.status === 'done' ? 'done' : 'paused',
@@ -128,7 +128,7 @@ export const useDownload = defineStore('download', {
       //   res()
       // })
       // delete this.pauseLine[download.id]
-      this.startDownload()
+      this.startDownload(download.id)
     },
     async remove(download: Source) {
       if (download.status === 'downloading') {
@@ -145,10 +145,10 @@ export const useDownload = defineStore('download', {
       const res = { ...item, ...download }
       await db.downloadList.put({ ...res, links: res.links.map(link => ({ ...link, url: '' })) })
     },
-    async startDownload() {
+    async startDownload(id?: string) {
       const config = useConfig()
       if (this.list.filter(item => item.status === 'downloading').length >= config.tasks) return
-      const startItem = this.list.findLast(item => item.status === 'ready')
+      const startItem = this.list.findLast(item => (!id || item.id === id) && item.status === 'ready')
       if (!startItem) return
       startItem.status = 'downloading'
       if(!startItem.links.every(link => link.url)) {

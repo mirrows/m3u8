@@ -30,6 +30,7 @@
   "copyLink": "复制链接",
   "requireAgain": "重新请求",
   "linkCopied": "链接已复制",
+  "copied": "已复制",
   "fileExist": "文件已存在",
   "continue": "继续",
   "continueTips": "请先修改文件名",

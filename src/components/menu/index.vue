@@ -48,6 +48,13 @@ const menuList = computed(() => ([
   }
 ]))
 
+const clickMenuItem = (item: typeof menuList.value[0]) => {
+  if (document.body.offsetWidth < 768) {
+    nav.setMenu(false)
+  }
+  item.fn()
+}
+
 const goIndex = () => {
   nav.setMenu(true)
   router.push({
@@ -73,7 +80,7 @@ const goIndex = () => {
       </div>
       <div class="m_menu_list_wrap">
         <div class="m_menu_list">
-          <div v-for="item in menuList" :key="item.title" class="m_menu_list_item" @click="item.fn">
+          <div v-for="item in menuList" :key="item.title" class="m_menu_list_item" @click="clickMenuItem(item)">
             <el-icon
               class="icon-primary m_menu_icon"
               size="16"

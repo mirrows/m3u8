@@ -28,9 +28,9 @@ export enum TO_LINK_STATUS {
 }
 
 export enum PROGRESS_MAP {
-  READY = 'warning',
-  PAUSED = 'warning',
-  DOWNLOADING = '',
+  READY = '',
+  PAUSED = '',
+  DOWNLOADING = 'warning',
   DONE = 'success',
   ERROR = 'exception'
 }

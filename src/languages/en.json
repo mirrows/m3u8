@@ -30,6 +30,7 @@
   "copyLink": "copy link",
   "requireAgain": "require again",
   "linkCopied": "link has copied",
+  "copied": "text has copied",
   "fileExist": "file existed",
   "continue": "continue",
   "continueTips": "please change the file name and then continue",
