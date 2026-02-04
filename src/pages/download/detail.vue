@@ -200,6 +200,7 @@ const setStatus = (index: number, status: LINK_STATUS) => {
   background-color: currentColor;
   color: #f5f5f5;
   opacity: 0.1;
+  z-index: -1;
 }
 .status_done_wrap:before{
   color: var(--el-color-success);
