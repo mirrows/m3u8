@@ -23,6 +23,10 @@ const percentage = computed(() => {
   return Math.min(doneLength.value/(downloadInfo.value.links || []).length * 100, 100)
 })
 
+const setStatus = (index: number, status: LINK_STATUS) => {
+  download.updateStatus(downloadInfo.value.id, index, status)
+}
+
 
 </script>
 
@@ -81,6 +85,10 @@ const percentage = computed(() => {
               <div>{{ language.cur.statusPadding }}</div>
             </div>
             <div class="status_area_exp_item">
+              <div class="link_item" :class="`status_pass`"></div>
+              <div>{{ language.cur.statusPass }}</div>
+            </div>
+            <div class="status_area_exp_item">
               <div class="link_item" :class="`status_done`"></div>
               <div>{{ language.cur.statusDone }}</div>
             </div>
@@ -106,12 +114,25 @@ const percentage = computed(() => {
           </div>
         </div>
         <div class="m_custom_scroller link_list">
-          <div
+          <el-popover
             v-for="(link, index) in downloadInfo.links"
+            trigger="click"
+            :disabled="link.status === LINK_STATUS.DONE"
             :key="index"
-            class="link_item"
-            :class="`status_${link.status}`"
-          ></div>
+          >
+            <template #reference>
+              <div
+                class="link_item"
+                :class="`status_${link.status}`"
+              ></div>
+            </template>
+            <div class="flex">
+              <div class="link_item" @click.stop="setStatus(index, '')"></div>
+              <div class="link_item" :class="`status_pass`" @click.stop="setStatus(index, LINK_STATUS.PASS)"></div>``
+              <div class="link_item" :class="`status_done`" @click.stop="setStatus(index, LINK_STATUS.DONE)"></div>
+            </div>
+          </el-popover>
+
         </div>
       </div>
     </el-card>
@@ -314,6 +335,10 @@ const percentage = computed(() => {
 .status_downloading{
   background-color: currentColor;
   color: var(--el-color-warning);
+}
+.status_pass{
+  background-color: currentColor;
+  color: var(--el-color-info);
 }
 .status_done{
   background-color: currentColor;

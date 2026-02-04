@@ -17,16 +17,19 @@ export enum TO_SOURCE_STATUS {
 
 export enum LINK_STATUS {
   PADDING = 'padding',
+  PASS = 'pass',
   DONE = 'done',
   ERROR = 'error',
 }
 
 export enum TO_LINK_STATUS {
   padding = 'PADDING',
+  pass = 'PASS',
   done = 'DONE',
   error = 'ERROR',
 }
 
+// 進度條配置
 export enum PROGRESS_MAP {
   READY = '',
   PAUSED = '',

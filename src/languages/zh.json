@@ -39,5 +39,6 @@
   "statusReady": "未开始",
   "statusPadding": "下载中",
   "statusDone": "已完成",
-  "statusError": "下载失败"
+  "statusError": "下载失败",
+  "statusPass": "跳过"
 }

@@ -6,6 +6,8 @@ import { wait } from '@/utils/tool'
 import { db } from '@/db'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useConfig } from './config'
+import { combine } from '@/components/custom-icon/svg-list'
+import type { LINK_STATUS } from '@/types/enum'
 
 const { invoke } = core
 
@@ -145,6 +147,12 @@ export const useDownload = defineStore('download', {
       const res = { ...item, ...download }
       await db.downloadList.put({ ...res, links: res.links.map(link => ({ ...link, url: '' })) })
     },
+    async updateStatus(id: string, index: number, status: LINK_STATUS) {
+      const i = this.list.findIndex(item => item.id === id)
+      if (i === -1) return
+      this.list[i].links[index].status = status
+      await db.downloadList.put({ ...this.list[i], links: this.list[i].links.map(link => ({ ...link, url: '' })) })
+    },
     async startDownload(id?: string) {
       const config = useConfig()
       if (this.list.filter(item => item.status === 'downloading').length >= config.tasks) return
@@ -158,8 +166,24 @@ export const useDownload = defineStore('download', {
       }
       const waiter = new Waiter()
       await db.downloadList.put({ ...startItem, links: startItem.links.map(link => ({ ...link, url: '' })) })
-      for (let i = 0; i < startItem.links.length; i++) {
-        // 检查是否已删除
+      // for (let i = 0; i < startItem.links.length; i++) {
+      //   // 检查是否已删除
+      //   if (this.deleteLine[startItem.id]) {
+      //     delete this.deleteLine[startItem.id]
+      //     return
+      //   }
+      //   if (startItem.status === 'paused') {
+      //     // await new Promise(resolve => this.pauseLine[startItem.id] = [...(this.pauseLine[startItem.id] || []), resolve]);
+      //     this.pauseDownload(startItem)
+      //     return
+      //   }
+      //   if (startItem.links[i].status === 'done') continue
+      //   if (startItem.links.filter(e => e.status === 'padding' || e.status === 'error').length >= config.process) {
+      //     await waiter.wait()
+      //   }
+      //   this.downloadItem(startItem, i, waiter, config)
+      // }
+      while(startItem.links.some(link => link.status !== 'done')) {
         if (this.deleteLine[startItem.id]) {
           delete this.deleteLine[startItem.id]
           return
@@ -169,11 +193,15 @@ export const useDownload = defineStore('download', {
           this.pauseDownload(startItem)
           return
         }
-        if (startItem.links[i].status === 'done') continue
+        const index = startItem.links.findIndex(link => !link.status || link.status === 'ready')
+        if (index === -1) {
+          await waiter.wait()
+          continue
+        }
         if (startItem.links.filter(e => e.status === 'padding' || e.status === 'error').length >= config.process) {
           await waiter.wait()
         }
-        this.downloadItem(startItem, i, waiter, config)
+        this.downloadItem(startItem, index, waiter, config)
       }
     },
     downloadItem(video: Source, index: number, waiter: Waiter, config: ReturnType<typeof useConfig>) {
@@ -204,20 +232,8 @@ export const useDownload = defineStore('download', {
           waiter.emit()
         }
         if (!video.links.every(link => link.status === 'done') || video.status === 'done') return
-        video.status = 'done'
+        this.combineDownload(video);
         this.startDownload();
-        await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
-        const combineRes = await invoke<Res<ResStatus>>('combine_splits', {
-          name: video.title,
-          fileType: video.links[0].url.split('.').reverse()[0],
-        });
-        if (combineRes.code !== 0 || combineRes.data.status !== 'done') {
-          // video.status = 'done'
-          // video.links.forEach(link => link.status = '')
-          // await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
-          retryCombine(video)
-          return
-        }
       }).catch(async (error) => {
         // console.log('error:', error)
         if (video.status === 'paused') {
@@ -232,6 +248,21 @@ export const useDownload = defineStore('download', {
         await this.downloadItem(video, index, waiter, config)
         return
       })
+    },
+    async combineDownload(video: Source) {
+      video.status = 'done'
+      await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
+      const combineRes = await invoke<Res<ResStatus>>('combine_splits', {
+        name: video.title,
+        fileType: video.links[0].url.split('.').reverse()[0],
+      });
+      if (combineRes.code !== 0 || combineRes.data.status !== 'done') {
+        // video.status = 'done'
+        // video.links.forEach(link => link.status = '')
+        // await db.downloadList.put({ ...video, links: video.links.map(link => ({ ...link, url: '' })) })
+        retryCombine(video)
+        return
+      }
     },
     pauseDownload(video: Source) {
       delete downloadList[video.id]

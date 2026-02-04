@@ -39,5 +39,6 @@
   "statusReady": "ready",
   "statusPadding": "padding",
   "statusDone": "done",
-  "statusError": "error"
+  "statusError": "error",
+  "statusPass": "pass"
 }
