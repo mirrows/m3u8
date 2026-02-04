@@ -1,3 +1,5 @@
+import type { Waiter } from "@/utils/tool";
+
 export type VideoMsg = {
   title: string;
   name: string;
@@ -35,6 +37,7 @@ export type Source = {
   siteUrl: string,
   links: Link[],
   lastLogin: number,
+  waiter: Waiter
 }
 
 export type Link = {

@@ -23,7 +23,7 @@ const percentage = computed(() => {
   return Math.min(doneLength.value/(downloadInfo.value.links || []).length * 100, 100)
 })
 
-const setStatus = (index: number, status: LINK_STATUS) => {
+const setStatus = (index: number, status: LINK_STATUS | '') => {
   download.updateStatus(downloadInfo.value.id, index, status)
 }
 
@@ -127,9 +127,12 @@ const setStatus = (index: number, status: LINK_STATUS) => {
               ></div>
             </template>
             <div class="flex">
-              <div class="link_item" @click.stop="setStatus(index, '')"></div>
-              <div class="link_item" :class="`status_pass`" @click.stop="setStatus(index, LINK_STATUS.PASS)"></div>``
-              <div class="link_item" :class="`status_done`" @click.stop="setStatus(index, LINK_STATUS.DONE)"></div>
+              <div class="link_item" :title="`${language.cur.set}${language.cur.statusReady}`" @click.stop="setStatus(index, '')"></div>
+              <div class="link_item" :title="`${language.cur.set}${language.cur.statusPass}`" :class="`status_pass`" @click.stop="setStatus(index, LINK_STATUS.PASS)"></div>
+              <div class="link_item" :title="`${language.cur.set}${language.cur.statusDone}`" :class="`status_done`" @click.stop="setStatus(index, LINK_STATUS.DONE)"></div>
+              <div class="link_item" :title="language.cur.copy" @click.stop="copy(link.url)">
+                <el-icon color="#000"><CopyDocument /></el-icon>
+              </div>
             </div>
           </el-popover>
 
@@ -325,6 +328,7 @@ const setStatus = (index: number, status: LINK_STATUS) => {
   box-shadow: inset 0 0 5px 1px #fff3f3;
   background-color: currentColor;
   color: #f5f5f5;
+  cursor: pointer;
 }
 
 .status_ready,

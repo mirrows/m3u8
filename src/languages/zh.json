@@ -40,5 +40,6 @@
   "statusPadding": "下载中",
   "statusDone": "已完成",
   "statusError": "下载失败",
-  "statusPass": "跳过"
+  "statusPass": "跳过",
+  "set": "设置"
 }
