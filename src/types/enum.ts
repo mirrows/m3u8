@@ -16,6 +16,7 @@ export enum TO_SOURCE_STATUS {
 }
 
 export enum LINK_STATUS {
+  READY = 'ready',
   PADDING = 'padding',
   PASS = 'pass',
   DONE = 'done',
@@ -23,6 +24,7 @@ export enum LINK_STATUS {
 }
 
 export enum TO_LINK_STATUS {
+  ready = 'READY',
   padding = 'PADDING',
   pass = 'PASS',
   done = 'DONE',

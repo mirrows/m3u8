@@ -10,6 +10,7 @@ import { useDownload } from '@/store/download';
 import Nav from '@/components/nav/index.vue'
 import type { Res, Source, VideoMsg } from '@/types/common';
 import { useNav } from '@/store/nav';
+import { SOURCE_STATUS } from '@/types/enum';
 
 const { invoke } = core
 
@@ -115,7 +116,7 @@ const downloadVideo = (quality: VideoMsg['quality'][number], checkExist = true) 
     }
     download.add({
       ...res.data,
-      status: 'ready',
+      status: SOURCE_STATUS.READY,
     })
     ElMessageBox.confirm('解析成功，即将开始下载，是否跳转下载列表?')
       .then((res) => {
@@ -199,7 +200,7 @@ const onContinue = () => {
                 <div class="history_title">{{curLanguage.history}}</div>
               </el-col>
             </el-row>
-            <el-row v-for="(history, i) in showedList" class="history_row" @click="curVideo = history">
+            <el-row v-for="(history, i) in showedList" :key="i" class="history_row" @click="curVideo = history">
               <el-col :span="16" class="flex">
                 <div class="grid-content ep-bg-purple-dark video_title">
                   <div class="two_line" :title="history.name">{{ history.name }}</div>

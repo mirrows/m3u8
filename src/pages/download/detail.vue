@@ -33,7 +33,7 @@ const setStatus = (index: number, status: LINK_STATUS) => {
 <template>
   <div class="download_detail_wrap">
     <el-card class="download_info_card">
-      <div class="download_info_content" :class="['done', 'error'].includes(downloadInfo.status) ? `status_${downloadInfo.status}_wrap` : ''">
+      <div class="download_info_content" :class="[SOURCE_STATUS.DONE, SOURCE_STATUS.ERROR].includes(downloadInfo.status) ? `status_${downloadInfo.status}_wrap` : ''">
         <div class="download_info_left">
           <div class="download_info_poster">
             <div class="poster_wrap">
@@ -55,9 +55,9 @@ const setStatus = (index: number, status: LINK_STATUS) => {
             <span @click.stop="copy(downloadInfo.siteUrl)">{{ downloadInfo.siteUrl }}</span>
           </div>
         </div>
-        <div v-if="downloadInfo.status !== 'done'" class="operate_wrap">
-          <template v-if="downloadInfo.status !== 'ready'">
-            <el-icon v-if="downloadInfo.status === 'paused'" class="operate_icon" @click.stop="download.resume(downloadInfo)"><CustomIcon icon="play" class="op_ic" /></el-icon>
+        <div v-if="downloadInfo.status !== SOURCE_STATUS.DONE" class="operate_wrap">
+          <template v-if="downloadInfo.status !== SOURCE_STATUS.READY">
+            <el-icon v-if="downloadInfo.status === SOURCE_STATUS.PAUSED" class="operate_icon" @click.stop="download.resume(downloadInfo)"><CustomIcon icon="play" class="op_ic" /></el-icon>
             <el-icon v-else class="operate_icon" @click.stop="download.pause(downloadInfo)"><CustomIcon icon="pause" class="op_ic" /></el-icon>
           </template>
         </div>
@@ -81,19 +81,19 @@ const setStatus = (index: number, status: LINK_STATUS) => {
               <div>{{ language.cur.statusReady }}</div>
             </div>
             <div class="status_area_exp_item">
-              <div class="link_item" :class="`status_padding`"></div>
+              <div class="link_item" :class="`status_${LINK_STATUS.PADDING}`"></div>
               <div>{{ language.cur.statusPadding }}</div>
             </div>
             <div class="status_area_exp_item">
-              <div class="link_item" :class="`status_pass`"></div>
+              <div class="link_item" :class="`status_${LINK_STATUS.PASS}`"></div>
               <div>{{ language.cur.statusPass }}</div>
             </div>
             <div class="status_area_exp_item">
-              <div class="link_item" :class="`status_done`"></div>
+              <div class="link_item" :class="`status_${LINK_STATUS.DONE}`"></div>``
               <div>{{ language.cur.statusDone }}</div>
             </div>
             <div class="status_area_exp_item">
-              <div class="link_item" :class="`status_error`"></div>
+              <div class="link_item" :class="`status_${SOURCE_STATUS.ERROR}`"></div>
               <div>{{ language.cur.statusError }}</div>
             </div>
           </div>
@@ -127,9 +127,9 @@ const setStatus = (index: number, status: LINK_STATUS) => {
               ></div>
             </template>
             <div class="flex">
-              <div class="link_item" @click.stop="setStatus(index, '')"></div>
-              <div class="link_item" :class="`status_pass`" @click.stop="setStatus(index, LINK_STATUS.PASS)"></div>``
-              <div class="link_item" :class="`status_done`" @click.stop="setStatus(index, LINK_STATUS.DONE)"></div>
+              <div class="link_item" @click.stop="setStatus(index, LINK_STATUS.READY)"></div>
+              <div class="link_item" :class="`status_${LINK_STATUS.PASS}`" @click.stop="setStatus(index, LINK_STATUS.PASS)"></div>``
+              <div class="link_item" :class="`status_${LINK_STATUS.DONE}`" @click.stop="setStatus(index, LINK_STATUS.DONE)"></div>
             </div>
           </el-popover>
 

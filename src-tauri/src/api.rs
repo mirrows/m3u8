@@ -131,7 +131,7 @@ pub async fn download_video(
     source.links = links
             .iter()
             .map(|link| Link {
-                status: String::from(""),
+                status: String::from("ready"),
                 url: link.to_string(),
                 // bytes: Vec::new(),
             })

@@ -1,3 +1,5 @@
+import type { LINK_STATUS, SOURCE_STATUS } from "./enum";
+
 export type VideoMsg = {
   title: string;
   name: string;
@@ -30,7 +32,7 @@ export type Source = {
   sizeStr: string,
   timestamp: number,
   timeStr: string,
-  status: string,
+  status: SOURCE_STATUS,
   url: string,
   siteUrl: string,
   links: Link[],
@@ -38,7 +40,7 @@ export type Source = {
 }
 
 export type Link = {
-  status: string,
+  status: LINK_STATUS,
   url: string,
   // bytes: any[],
 }
