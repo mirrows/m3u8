@@ -2,7 +2,6 @@
 import type { VideoMsg } from '@/types/common'
 import { defineStore } from 'pinia'
 import { db } from '@/db'
-import { load } from '@tauri-apps/plugin-store'
 
 export const useDownloadHistory = defineStore('history', {
   state: () => ({

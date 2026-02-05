@@ -23,7 +23,7 @@ const percentage = computed(() => {
   return Math.min(doneLength.value/(downloadInfo.value.links || []).length * 100, 100)
 })
 
-const setStatus = (index: number, status: LINK_STATUS) => {
+const setStatus = (index: number, status: LINK_STATUS | '') => {
   download.updateStatus(downloadInfo.value.id, index, status)
 }
 
@@ -66,8 +66,8 @@ const setStatus = (index: number, status: LINK_STATUS) => {
         <div class="flex">
           <div style="flex: 1">{{downloadInfo.timeStr}}</div>
           <div>
-            <div v-if="downloadInfo.status === 'downloading' && !downloadInfo.links.every(link => link.url)" class="inqueue_tips">{{ language.cur.waitingForSource }}</div>
-            <div v-else-if="downloadInfo.status === 'ready'" class="inqueue_tips">{{ language.cur.inTheQueue }}</div>
+            <div v-if="downloadInfo.status === SOURCE_STATUS.DOWNLOADING && !downloadInfo.links.every(link => link.url)" class="inqueue_tips">{{ language.cur.waitingForSource }}</div>
+            <div v-else-if="downloadInfo.status === SOURCE_STATUS.READY" class="inqueue_tips">{{ language.cur.inTheQueue }}</div>
           </div>
         </div>
       </template>
@@ -127,9 +127,12 @@ const setStatus = (index: number, status: LINK_STATUS) => {
               ></div>
             </template>
             <div class="flex">
-              <div class="link_item" @click.stop="setStatus(index, LINK_STATUS.READY)"></div>
-              <div class="link_item" :class="`status_${LINK_STATUS.PASS}`" @click.stop="setStatus(index, LINK_STATUS.PASS)"></div>``
-              <div class="link_item" :class="`status_${LINK_STATUS.DONE}`" @click.stop="setStatus(index, LINK_STATUS.DONE)"></div>
+              <div class="link_item" :title="`${language.cur.set}${language.cur.statusReady}`" @click.stop="setStatus(index, LINK_STATUS.READY)"></div>
+              <div class="link_item" :title="`${language.cur.set}${language.cur.statusPass}`" :class="`status_${LINK_STATUS.PASS}`" @click.stop="setStatus(index, LINK_STATUS.PASS)"></div>
+              <div class="link_item" :title="`${language.cur.set}${language.cur.statusDone}`" :class="`status_${LINK_STATUS.DONE}`" @click.stop="setStatus(index, LINK_STATUS.DONE)"></div>
+              <div class="link_item" :title="language.cur.copy" @click.stop="copy(link.url)">
+                <el-icon color="#000"><CopyDocument /></el-icon>
+              </div>
             </div>
           </el-popover>
 
@@ -200,6 +203,7 @@ const setStatus = (index: number, status: LINK_STATUS) => {
   background-color: currentColor;
   color: #f5f5f5;
   opacity: 0.1;
+  z-index: -1;
 }
 .status_done_wrap:before{
   color: var(--el-color-success);
@@ -324,6 +328,7 @@ const setStatus = (index: number, status: LINK_STATUS) => {
   box-shadow: inset 0 0 5px 1px #fff3f3;
   background-color: currentColor;
   color: #f5f5f5;
+  cursor: pointer;
 }
 
 .status_ready,

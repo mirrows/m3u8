@@ -115,3 +115,22 @@ export async function getDownloadDir() {
   console.log("下载目录：", path);
   return path;
 }
+
+export class Waiter {
+  res: Function[]
+  constructor() {
+    this.res = [];
+  }
+  async wait() {
+    return new Promise((res) => {
+      this.res.push(res)
+    })
+  }
+
+  async emit() {
+    if (!this.res) return
+    const fn = this.res.shift()
+    if(!fn) return
+    await fn()
+  }
+}

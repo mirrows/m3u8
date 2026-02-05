@@ -41,5 +41,6 @@
   "statusPadding": "padding",
   "statusDone": "done",
   "statusError": "error",
-  "statusPass": "pass"
+  "statusPass": "pass",
+  "set": "set to "
 }

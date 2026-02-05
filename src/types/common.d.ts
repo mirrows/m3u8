@@ -1,4 +1,5 @@
 import type { LINK_STATUS, SOURCE_STATUS } from "./enum";
+import type { Waiter } from "@/utils/tool";
 
 export type VideoMsg = {
   title: string;
@@ -37,6 +38,7 @@ export type Source = {
   siteUrl: string,
   links: Link[],
   lastLogin: number,
+  waiter: Waiter
 }
 
 export type Link = {

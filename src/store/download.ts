@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import type { Res, ResStatus, Source, VideoMsg } from '@/types/common'
 import { core } from '@tauri-apps/api'
-import { wait } from '@/utils/tool'
+import { wait, Waiter } from '@/utils/tool'
 import { db } from '@/db'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { useConfig } from './config'
@@ -44,6 +44,7 @@ const retryDownload = async (startItem: Source) => {
     return
   }
   const source = await invoke<Res<Source>>('download_video', {
+    ...startItem,
     ...quality,
     title: startItem.title,
     checkExist: false,
@@ -147,7 +148,7 @@ export const useDownload = defineStore('download', {
       const res = { ...item, ...download }
       await db.downloadList.put({ ...res, links: res.links.map(link => ({ ...link, url: '' })) })
     },
-    async updateStatus(id: string, index: number, status: LINK_STATUS) {
+    async updateStatus(id: string, index: number, status: LINK_STATUS | '') {
       const i = this.list.findIndex(item => item.id === id)
       if (i === -1) return
       this.list[i].links[index].status = status
@@ -272,21 +273,4 @@ export const useDownload = defineStore('download', {
   }
 })
 
-class Waiter {
-  res: Function[]
-  constructor() {
-    this.res = [];
-  }
-  async wait() {
-    return new Promise((res) => {
-      this.res.push(res)
-    })
-  }
 
-  async emit() {
-    if (!this.res) return
-    const fn = this.res.shift()
-    if(!fn) return
-    await fn()
-  }
-}
