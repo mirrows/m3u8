@@ -115,6 +115,8 @@ const downloadVideo = (quality: VideoMsg['quality'][number], checkExist = true) 
     }
     download.add({
       ...res.data,
+      time: 0,
+      timer: null,
       status: SOURCE_STATUS.READY,
     })
     ElMessageBox.confirm('解析成功，即将开始下载，是否跳转下载列表?')

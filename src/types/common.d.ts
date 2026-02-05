@@ -38,7 +38,9 @@ export type Source = {
   siteUrl: string,
   links: Link[],
   lastLogin: number,
-  waiter: Waiter
+  waiter: Waiter,
+  time: number,
+  timer: Nodejs.Timeout | null,
 }
 
 export type Link = {

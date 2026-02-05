@@ -23,6 +23,14 @@ const percentage = computed(() => {
   return Math.min(doneLength.value/(downloadInfo.value.links || []).length * 100, 100)
 })
 
+const spendTime = computed(() => {
+  const time = downloadInfo.value.time || 0
+  const hours = Math.floor(time / 3600)
+  const minutes = Math.floor((time % 3600) / 60)
+  const seconds = time % 60
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+})
+
 const setStatus = (index: number, status: LINK_STATUS) => {
   download.updateStatus(downloadInfo.value.id, index, status)
 }
@@ -64,7 +72,11 @@ const setStatus = (index: number, status: LINK_STATUS) => {
       </div>
       <template #footer>
         <div class="flex">
-          <div style="flex: 1">{{downloadInfo.timeStr}}</div>
+          <div style="flex: 1">
+            <span>{{downloadInfo.timeStr}}</span>
+            <span style="margin: 0 10px;">|</span>
+            <span>{{spendTime}}</span>
+          </div>
           <div>
             <div v-if="downloadInfo.status === SOURCE_STATUS.DOWNLOADING && !downloadInfo.links.every(link => link.url)" class="inqueue_tips">{{ language.cur.waitingForSource }}</div>
             <div v-else-if="downloadInfo.status === SOURCE_STATUS.READY" class="inqueue_tips">{{ language.cur.inTheQueue }}</div>

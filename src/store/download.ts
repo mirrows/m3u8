@@ -12,6 +12,26 @@ const { invoke } = core
 
 const downloadList: Record<string, number[]> = {}
 
+
+const startCount = (video: Source) => {
+  if (video.timer) {
+    clearInterval(video.timer)
+  }
+  video.timer = setInterval(() => {
+    video.time += 1
+    if(video.time > 10) {
+      db.downloadList.put({ ...video })
+    }
+  }, 1000)
+}
+const stopCount = (video: Source) => {
+  if (video.timer) {
+    clearInterval(video.timer)
+    video.timer = null
+  }
+  db.downloadList.put({ ...video })
+}
+
 const retryCombine = (video: Source) => {
 
   ElMessageBox.confirm(video.title, '合并失败', {
@@ -25,7 +45,9 @@ const retryCombine = (video: Source) => {
     }).then((res) => {
       if (res.code !== 0 || res.data.status !== SOURCE_STATUS.DONE) {
         retryCombine(video)
+        return
       }
+      stopCount(video)
     });
   })
 }
@@ -123,6 +145,7 @@ export const useDownload = defineStore('download', {
     },
     pause(download: Source) {
       download.status = SOURCE_STATUS.PAUSED
+      stopCount(download)
       this.startDownload()
     },
     resume(download: Source) {
@@ -137,6 +160,7 @@ export const useDownload = defineStore('download', {
       if (download.status === SOURCE_STATUS.DOWNLOADING) {
         this.deleteLine[download.id] = true
       }
+      stopCount(download)
       this.list = this.list.filter(item => item.id !== download.id)
       await db.downloadList.delete(download.id)
       this.startDownload()
@@ -160,6 +184,7 @@ export const useDownload = defineStore('download', {
       const startItem = this.list.findLast(item => (!id || item.id === id) && item.status === SOURCE_STATUS.READY)
       if (!startItem) return
       startItem.status = SOURCE_STATUS.DOWNLOADING
+      startCount(startItem)
       if(!startItem.links.every(link => link.url)) {
         const newItem = await retryDownload(startItem)
         if (!newItem) return
@@ -267,6 +292,7 @@ export const useDownload = defineStore('download', {
         retryCombine(video)
         return
       }
+      stopCount(video)
     },
     pauseDownload(video: Source) {
       delete downloadList[video.id]
