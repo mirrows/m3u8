@@ -160,7 +160,7 @@ export const useDownload = defineStore('download', {
       const startItem = this.list.findLast(item => (!id || item.id === id) && item.status === SOURCE_STATUS.READY)
       if (!startItem) return
       startItem.status = SOURCE_STATUS.DOWNLOADING
-      if(!startItem.links.every(link => link.status === LINK_STATUS.READY)) {
+      if(!startItem.links.every(link => link.url)) {
         const newItem = await retryDownload(startItem)
         if (!newItem) return
         startItem.links = newItem.links
