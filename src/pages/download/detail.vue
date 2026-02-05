@@ -23,7 +23,7 @@ const percentage = computed(() => {
   return Math.min(doneLength.value/(downloadInfo.value.links || []).length * 100, 100)
 })
 
-const setStatus = (index: number, status: LINK_STATUS | '') => {
+const setStatus = (index: number, status: LINK_STATUS) => {
   download.updateStatus(downloadInfo.value.id, index, status)
 }
 
@@ -89,7 +89,7 @@ const setStatus = (index: number, status: LINK_STATUS | '') => {
               <div>{{ language.cur.statusPass }}</div>
             </div>
             <div class="status_area_exp_item">
-              <div class="link_item" :class="`status_${LINK_STATUS.DONE}`"></div>``
+              <div class="link_item" :class="`status_${LINK_STATUS.DONE}`"></div>
               <div>{{ language.cur.statusDone }}</div>
             </div>
             <div class="status_area_exp_item">

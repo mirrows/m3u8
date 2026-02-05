@@ -51,7 +51,6 @@ const showedList = computed(() => {
 
 const loadList = () => {
   if (showedList.value.length === historyList.value.length) return
-  console.log(4564)
   loadTimes.value += 1
 }
 

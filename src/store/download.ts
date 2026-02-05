@@ -148,7 +148,7 @@ export const useDownload = defineStore('download', {
       const res = { ...item, ...download }
       await db.downloadList.put({ ...res, links: res.links.map(link => ({ ...link, url: '' })) })
     },
-    async updateStatus(id: string, index: number, status: LINK_STATUS | '') {
+    async updateStatus(id: string, index: number, status: LINK_STATUS) {
       const i = this.list.findIndex(item => item.id === id)
       if (i === -1) return
       this.list[i].links[index].status = status
@@ -184,12 +184,13 @@ export const useDownload = defineStore('download', {
       //   }
       //   this.downloadItem(startItem, i, waiter, config)
       // }
+      const isStatusPaused = (s: SOURCE_STATUS): boolean => s === SOURCE_STATUS.PAUSED;
       while(startItem.links.some(link => link.status !== LINK_STATUS.DONE)) {
         if (this.deleteLine[startItem.id]) {
           delete this.deleteLine[startItem.id]
           return
         }
-        if (startItem.status === SOURCE_STATUS.PAUSED) {``
+        if (isStatusPaused(startItem.status)) {
           // await new Promise(resolve => this.pauseLine[startItem.id] = [...(this.pauseLine[startItem.id] || []), resolve]);
           this.pauseDownload(startItem)
           return
@@ -215,7 +216,7 @@ export const useDownload = defineStore('download', {
       //   '包含错误的进程数',
       //   video.links.filter(e => e.status === LINK_STATUS.PADDING || e.status === LINK_STATUS.ERROR).length,
       // )
-      return invoke<Res<ResStatus>>('download_item', {
+      return invoke<Res<ResStatus<LINK_STATUS>>>('download_item', {
         url: video.links[index].url,
         path,
       }).then(async (res) => {

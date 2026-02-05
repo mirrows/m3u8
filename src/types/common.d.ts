@@ -47,8 +47,8 @@ export type Link = {
   // bytes: any[],
 }
 
-export type ResStatus = {
-  status: string,
+export type ResStatus<T = string> = {
+  status: T,
   errMsg: string,
 }
 
