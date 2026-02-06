@@ -188,7 +188,7 @@ export const useDownload = defineStore('download', {
       if(!startItem.links.every(link => link.url)) {
         const newItem = await retryDownload(startItem)
         if (!newItem) return
-        startItem.links = newItem.links
+        startItem.links = startItem.links.map((item, i) => ({ ...item, url: newItem.links[i]?.url || item.url  || '' }))
       }
       const waiter = new Waiter()
       await db.downloadList.put({ ...startItem, links: startItem.links.map(link => ({ ...link, url: '' })) })
