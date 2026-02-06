@@ -39,3 +39,8 @@ export enum PROGRESS_MAP {
   DONE = 'success',
   ERROR = 'exception'
 }
+
+export enum ParseType {
+  XHAMSTER,
+  NORMAL
+}

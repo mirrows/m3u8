@@ -231,7 +231,7 @@ export const useDownload = defineStore('download', {
         this.downloadItem(startItem, index, waiter, config)
       }
     },
-    downloadItem(video: Source, index: number, waiter: Waiter, config: ReturnType<typeof useConfig>) {
+    downloadItem(video: Source, index: number, waiter: Waiter, config: ReturnType<typeof useConfig>, times = 1) {
       video.links[index].status = LINK_STATUS.PADDING
       downloadList[video.id] = [...(downloadList[video.id] || []), index]
       const path = `${video.title}/${String(index).padStart(5, '0')}${video.links[index].url.split('/').reverse()[0]}`
@@ -274,7 +274,11 @@ export const useDownload = defineStore('download', {
         downloadList[video.id].splice(ind, 1)
         await wait()
         if (['', LINK_STATUS.READY, LINK_STATUS.PASS, LINK_STATUS.DONE].includes(video.links[index].status)) return // 手动修改状态的下载项，不再做响应
-        await this.downloadItem(video, index, waiter, config)
+        if (times > 3) {
+          video.links[index].status = LINK_STATUS.PASS
+        } else {
+          await this.downloadItem(video, index, waiter, config, times + 1)
+        }
         return
       })
     },

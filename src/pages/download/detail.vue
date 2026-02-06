@@ -20,7 +20,7 @@ const doneLength = computed(() => {
 })
 
 const percentage = computed(() => {
-  return Math.min(doneLength.value/(downloadInfo.value.links || []).length * 100, 100)
+  return Math.floor(Math.min(doneLength.value/(downloadInfo.value.links || []).length * 100, 100))
 })
 
 const spendTime = computed(() => {

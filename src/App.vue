@@ -19,11 +19,11 @@
 
 
   onMounted(async () => {
-    await history.load()
-    await download.load()
-    await config.load()
-
-    console.log(1222222, config.tasks)
+    await Promise.all([
+      history.load(),
+      download.load(),
+      config.load()
+    ])
   })
 
 </script>

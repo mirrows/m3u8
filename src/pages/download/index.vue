@@ -72,7 +72,7 @@ const goDetail = (item: Source) => {
         </div>
         <el-progress
           v-if="item.status !== 'done'"
-          :percentage="Math.min(item.links.filter(link => link.status === 'done').length/item.links.length * 100, 100)"
+          :percentage="Math.floor(Math.min(item.links.filter(link => link.status === 'done').length/item.links.length * 100, 100))"
           :stroke-width="5"
           striped
           striped-flow
