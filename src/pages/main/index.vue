@@ -75,6 +75,7 @@ const submit = () => {
       }
       dHistory.add(video);
       curVideo.value = video;
+      textarea.value = '';
 
     } else {
       ElMessage.error(res.msg);

@@ -28,6 +28,7 @@ const videoTypeOptions = ref([
   { label: 'm4s', value: 'm4s' },
   { label: 'mp4', value: 'mp4' },
   { label: 'm4a', value: 'm4a' },
+  { label: 'png', value: 'png' },
 ])
 
 const onClickFolder = (type: string) => {

@@ -188,7 +188,10 @@ export const useDownload = defineStore('download', {
       if(!startItem.links.every(link => link.url)) {
         const newItem = await retryDownload(startItem)
         if (!newItem) return
-        startItem.links = startItem.links.map((item, i) => ({ ...item, url: newItem.links[i]?.url || item.url  || '' }))
+        startItem.links = startItem.links.map((item, i) => ({
+          url: newItem.links[i]?.url || item.url || '',
+          status: [LINK_STATUS.DONE, LINK_STATUS.PASS].includes(item.status) ? item.status : LINK_STATUS.READY
+        }))
       }
       const waiter = new Waiter()
       await db.downloadList.put({ ...startItem, links: startItem.links.map(link => ({ ...link, url: '' })) })
@@ -258,8 +261,18 @@ export const useDownload = defineStore('download', {
         if (video.links.filter(e => e.status === LINK_STATUS.PADDING || e.status === LINK_STATUS.ERROR).length < config.process) {
           waiter.emit()
         }
-        if (!video.links.every(link => link.status === LINK_STATUS.DONE) || video.status === SOURCE_STATUS.DONE) return``
-        this.combineDownload(video);
+        if (!video.links.every(link => link.status === LINK_STATUS.DONE || link.status === LINK_STATUS.PASS) || video.status === SOURCE_STATUS.DONE) return
+        if (video.links.some(link => link.status === LINK_STATUS.PASS)) {
+          // 全部视频已过一遍之后判断存在跳过的视频时直接跳过，下载下一个，等待手动重新下载
+          video.status = SOURCE_STATUS.PAUSED
+          video.links = video.links.map(link => ({
+            ...link,
+            url: ''
+          }))
+        } else {
+          // 在所有状态都为done的时候才合并视频
+          this.combineDownload(video);
+        }
         this.startDownload();
       }).catch(async (error) => {
         // console.log('error:', error)
@@ -274,8 +287,9 @@ export const useDownload = defineStore('download', {
         downloadList[video.id].splice(ind, 1)
         await wait()
         if (['', LINK_STATUS.READY, LINK_STATUS.PASS, LINK_STATUS.DONE].includes(video.links[index].status)) return // 手动修改状态的下载项，不再做响应
-        if (times > 3) {
+        if (times > 10) {
           video.links[index].status = LINK_STATUS.PASS
+          waiter.emit()
         } else {
           await this.downloadItem(video, index, waiter, config, times + 1)
         }
