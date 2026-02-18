@@ -91,6 +91,12 @@ const downloadVideo = (quality: VideoMsg['quality'][number], checkExist = true) 
     text: '正在解析链接... ...',
     background: 'rgba(255, 255, 255, 0.7)',
   })
+  if (download.list.some(item => item.title === curVideo.value.name)) {
+    tmpQuality.value = quality
+    fileName.value = curVideo.value.name
+    dialogVisible.value = true
+    return
+  }
   invoke<Res<Source>>('download_video', {
     ...curVideo.value,
     ...quality,
@@ -101,6 +107,7 @@ const downloadVideo = (quality: VideoMsg['quality'][number], checkExist = true) 
   }).then((res) => {
     loading.close();
     if (res.code === 1) {
+      // 出现重复的文件，询问用户是否继续下载
       tmpQuality.value = quality
       fileName.value = curVideo.value.name
       dialogVisible.value = true
