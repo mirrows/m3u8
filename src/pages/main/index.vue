@@ -60,6 +60,7 @@ const submit = () => {
     return;
   }
   loading.value = true;
+  console.log('submit content:', textarea.value)
   invoke<Res<VideoMsg>>('parse_site', {
     url: textarea.value,
   }).then((res) => {
