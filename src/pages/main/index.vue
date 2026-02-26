@@ -22,6 +22,7 @@ const curLanguage = computed(() => {
 })
 const textarea = ref('')
 const fileName = ref('')
+const type = ref('')
 const loading = ref(false)
 const dialogVisible = ref(false)
 const loadTimes = ref(0)
@@ -55,6 +56,9 @@ const loadList = () => {
 }
 
 const submit = () => {
+  if (!type) {
+    console.log('按照默认链接解析')
+  }
   if (!textarea.value) {
     ElMessage.warning('请输入url');
     return;
