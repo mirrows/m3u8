@@ -3,7 +3,6 @@
 When generating git commit messages, you MUST follow the format below:
 
 <type>(subproject): <body>
-<email>
 
 ## Format Requirements
 
@@ -34,14 +33,10 @@ feat | fix | docs | style | refactor | perf | test | chore
 - DO NOT include emojis
 - DO NOT wrap lines
 
-6. email rules:
-- Use the git user email from repository config
-- Always place email on the second line
-
 ## Example
 
 feat(editor): 新增视频粘贴自动转换为video标签
-dev@example.com
 
 fix(editor,map): 修复组件销毁后内存未释放问题
-dev@example.com
+
+Always strictly follow the required format without deviation.
