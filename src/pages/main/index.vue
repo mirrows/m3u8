@@ -3,7 +3,7 @@ import { useLanguageStore } from '@/store/language';
 import { ElLoading, ElMessage, ElMessageBox } from 'element-plus';
 import { computed, onUnmounted, reactive, ref } from 'vue';
 import { core } from '@tauri-apps/api'
-import { copy, parseSize } from '@/utils/tool';
+import { copy, parseSize, getRandomRGB } from '@/utils/tool';
 import { useRouter } from 'vue-router'
 import { useDownloadHistory } from '@/store/history';
 import { useDownload } from '@/store/download';
@@ -20,6 +20,7 @@ const language = useLanguageStore()
 const curLanguage = computed(() => {
   return language.cur
 })
+const randomColor = ref(getRandomRGB(0.8))
 const textarea = ref('')
 const fileName = ref('')
 const type = ref('')
@@ -243,6 +244,7 @@ const onContinue = () => {
             </el-row>
           </div>
         </el-space>
+        <!-- <div style="padding: 3px;color: #000" :style="`background-color: ${randomColor}`">{{ randomColor }}</div> -->
         <div class="quality_drawer">
           <el-drawer v-model="drawer" direction="btt" :with-header="false" resizable>
             <el-row>

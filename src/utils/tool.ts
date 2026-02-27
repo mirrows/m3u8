@@ -134,3 +134,42 @@ export class Waiter {
     await fn()
   }
 }
+
+// 实现一个js函数：随机生成一个rgb色值，同时可以通过入参light: 0-1调整该色值偏亮还是偏暗
+/**
+ * 随机生成RGB色值
+ * @param {number} light - 亮度调整值，范围0-1，0为最暗，1为最亮，默认0.5
+ * @returns {string} RGB色值，格式为 'rgb(r, g, b)'
+ */
+export function getRandomRGB(light = 0.5) {
+  // 限制light在0-1之间
+  light = Math.max(0, Math.min(1, light));
+
+  // 生成随机的RGB基础值（0-255）
+  const randomR = Math.floor(Math.random() * 256);
+  const randomG = Math.floor(Math.random() * 256);
+  const randomB = Math.floor(Math.random() * 256);
+
+  // 根据light值调整亮度
+  // light=0时，完全变暗（0）
+  // light=1时，完全变亮（255）
+  // light=0.5时，保持原色。
+  // 为了避免靠近0或255时概率上升，分别对暗和亮两段进行线性插值。
+  const adjustChannel = (c: number) => {
+    if (light < 0.5) {
+      // 向黑色线性过渡
+      return Math.floor(c * (light * 2));
+    } else {
+      // 向白色线性过渡
+      return Math.floor(c + (255 - c) * ((light - 0.5) * 2));
+    }
+  };
+
+  const r = adjustChannel(randomR);
+  const g = adjustChannel(randomG);
+  const b = adjustChannel(randomB);
+
+  // 确保不超过合法范围
+  const clamp = (v: number) => Math.min(255, Math.max(0, v));
+  return `rgb(${clamp(r)}, ${clamp(g)}, ${clamp(b)})`;
+}
