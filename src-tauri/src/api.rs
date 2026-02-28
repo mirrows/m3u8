@@ -46,6 +46,9 @@ pub async fn parse_site(url: String) -> Result<Res<VideoMsg>, String> {
     let poster = poster.replace(r#"\/"#, "/");
     let link = handle_body(&body, link_re);
     eprintln!("title: {}, poster: {}, links: {}", title, poster, link);
+    if link.is_empty() {
+        return Err("link is empty".to_string()); // 如果发生错误则返回
+    }
     let quality_body = match fetch_and_process(&link, 5).await {
         Ok(body) => body, // 这里是从 Result 中提取 String
         Err(e) => {

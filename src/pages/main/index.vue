@@ -68,6 +68,10 @@ const submit = () => {
   invoke<Res<VideoMsg>>('parse_site', {
     url: textarea.value,
   }).then((res) => {
+  // const source = await loadUrlAndFetchContent(textarea.value)
+  // invoke<Res<VideoMsg>>('parse_site_new', {
+  //   url: textarea.value,
+  // }).then((res) => {
     loading.value = false;
     if (res.code === 0) {
       const video = {
@@ -96,7 +100,8 @@ const downloadVideo = (quality: VideoMsg['quality'][number], checkExist = true) 
     text: '正在解析链接... ...',
     background: 'rgba(255, 255, 255, 0.7)',
   })
-  if (download.list.some(item => item.title === curVideo.value.name)) {
+  if (checkExist && download.list.some(item => item.title === curVideo.value.name)) {
+    loading.close();
     tmpQuality.value = quality
     fileName.value = curVideo.value.name
     dialogVisible.value = true
@@ -203,6 +208,7 @@ const onContinue = () => {
           <el-input
             v-model="textarea"
             :rows="5"
+            :readonly="loading"
             type="textarea"
             class="url_textarea"
             :placeholder="curLanguage.placeholder"
@@ -308,6 +314,7 @@ const onContinue = () => {
   position: sticky;
   top: 0;
   margin-top: 20px;
+  z-index: 1;
 }
 .history_title{
   font-size: 0.8rem;
