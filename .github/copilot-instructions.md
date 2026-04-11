@@ -1,42 +1,100 @@
 # Git Commit Message Rules
 
-When generating git commit messages, you MUST follow the format below:
+Generate ONE single commit message for all changes.
 
-<type>(subproject): <body>
+## Required Format
 
-## Format Requirements
+Single line header + optional multi-line body:
 
-1. Commit message must contain exactly TWO lines.
+<type>(subproject):
+<body>
 
+---
+
+## Header Rules
+
+1. Header must appear ONLY ONCE.
 2. Format:
 
-type(subproject): body
-email
+type(subproject):
 
 3. type must be one of:
+
 feat | fix | docs | style | refactor | perf | test | chore
 
-4. subproject rules:
-- Detect modified files under `src/pages/`
-- Extract the first-level directory name after `src/pages/`
-- If multiple subprojects are modified, join them using commas
-- Example:
-  - src/pages/editor/a.js → editor
-  - src/pages/map/b.js → map
-  - result → (editor,map)
+---
 
-5. body rules:
-- MUST be written in Chinese
-- Describe the actual code change clearly
-- Use concise sentence
-- DO NOT include file paths
-- DO NOT include emojis
-- DO NOT wrap lines
+## Subproject Rules
 
-## Example
+1. Detect modified files under:
 
-feat(editor): 新增视频粘贴自动转换为video标签
+src/pages/
 
-fix(editor,map): 修复组件销毁后内存未释放问题
+2. Extract the first-level directory name after `src/pages/`.
 
-Always strictly follow the required format without deviation.
+Examples:
+- src/pages/main/a.vue → main
+- src/pages/download/b.js → download
+
+3. If multiple subprojects are modified:
+- merge them
+- remove duplicates
+- join using commas
+
+Example:
+
+(main,download,test)
+
+---
+
+## Body Rules
+
+### When only ONE logical change exists
+Write ONE short Chinese sentence.
+
+Example:
+
+优化下载页面交互逻辑
+
+---
+
+### When MULTIPLE changes exist
+
+You MUST:
+
+- use numbered list
+- each item describes one logical change
+- keep sentences concise
+- Chinese only
+
+Format:
+
+1. xxx
+2. xxx
+3. xxx
+
+---
+
+## VERY IMPORTANT RULES
+
+- NEVER generate multiple commit headers
+- NEVER repeat `type(subproject)`
+- ALWAYS merge all changes into ONE commit message
+- Body should be concise
+- Do not include file paths
+- Do not include explanations
+- Do not use emojis
+
+---
+
+## Example (Multiple Changes)
+
+feat(main,download,test):
+1. 删除main页面的注释
+2. download添加下载项编辑功能
+3. test新增成功提示信息
+
+---
+
+Generate ONLY the commit message.
+Strictly follow the format.

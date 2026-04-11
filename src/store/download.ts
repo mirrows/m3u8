@@ -225,6 +225,16 @@ export const useDownload = defineStore('download', {
         }
         const index = startItem.links.findIndex(link => !link.status || link.status === LINK_STATUS.READY)
         if (index === -1) {
+          if (startItem.links.every(link => link.status === LINK_STATUS.DONE || link.status === LINK_STATUS.PASS)) {
+            // 全部视频已过一遍之后判断存在跳过的视频时直接跳过，下载下一个，等待手动重新下载
+            startItem.status = SOURCE_STATUS.PAUSED
+            startItem.links = startItem.links.map(link => ({
+              ...link,
+              url: ''
+            }))
+            this.startDownload();
+            return
+          }
           await waiter.wait()
           continue
         }
